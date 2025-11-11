@@ -5,8 +5,21 @@ use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+    return view('home');
+});
+
+// Páginas principais
+Route::get('/livros', function () {
+    return view('livros.index');
+})->name('livros.index');
+
+Route::get('/autores', function () {
+    return view('autores.index');
+})->name('autores.index');
+
+Route::get('/editoras', function () {
+    return view('editoras.index');
+})->name('editoras.index');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])

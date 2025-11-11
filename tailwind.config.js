@@ -19,5 +19,10 @@ export default {
         },
     },
 
-    plugins: [forms, typography],
+    //plugins: [forms, typography],
+    plugins: [require('daisyui')],
+  daisyui: {
+  themes: ["corporate"],
+},
+
 };

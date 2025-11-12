@@ -1,55 +1,48 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
-use Livewire\Volt\Volt;
+use App\Http\Livewire\Livros;
+use App\Http\Livewire\LivroForm;
+use App\Http\Livewire\Autores;
+use App\Http\Livewire\AutorForm;
+use App\Http\Livewire\Editoras;
+use App\Http\Livewire\EditoraForm;
+use App\Http\Controllers\LivroController;
 
-Route::get('/', function () {
-    return view('home');
-});
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
-// Páginas principais
-Route::get('/livros', function () {
-    return view('livros.index');
-})->name('livros.index');
+// Rota inicial: redireciona para dashboard
+Route::get('/', fn() => redirect()->route('dashboard'));
 
-Route::get('/autores', function () {
-    return view('autores.index');
-})->name('autores.index');
-
-Route::get('/editoras', function () {
-    return view('editoras.index');
-})->name('editoras.index');
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
+// Área autenticada
 Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
 
-    Volt::route('settings/profile', 'settings.profile')->name('profile.edit');
-    Volt::route('settings/password', 'settings.password')->name('user-password.edit');
-    Volt::route('settings/appearance', 'settings.appearance')->name('appearance.edit');
+    // Dashboard
+    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    Volt::route('settings/two-factor', 'settings.two-factor')
-        ->middleware(
-            when(
-                Features::canManageTwoFactorAuthentication()
-                    && Features::optionEnabled(Features::twoFactorAuthentication(), 'confirmPassword'),
-                ['password.confirm'],
-                [],
-            ),
-        )
-        ->name('two-factor.show');
+    // Livros
+    Route::get('/livros', Livros::class)->name('livros.index');
+    Route::get('/livros/create', \App\Http\Livewire\LivroForm::class)->name('livros.create');
+    Route::get('/livros/{livro}/edit', \App\Http\Livewire\LivroForm::class)->name('livros.edit');
+
+    Route::delete('/livros/{livro}', [LivroController::class, 'destroy'])->name('livros.destroy');
+
+    // Autores
+    Route::get('/autores', Autores::class)->name('autores.index');
+    Route::get('/autores/create', \App\Http\Livewire\AutorForm::class)->name('autores.create');
+   Route::get('/autores/{autor}/edit', \App\Http\Livewire\AutorForm::class)->name('autores.edit');
+
+    // Editoras
+    Route::get('/editoras', Editoras::class)->name('editoras.index');
+    Route::get('/editoras/create', \App\Http\Livewire\EditoraForm::class)->name('editoras.create');
+    Route::get('/editoras/{editora}/edit', \App\Http\Livewire\EditoraForm::class)->name('editoras.edit');
+
+
 });
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
+
+

@@ -1,27 +1,40 @@
 <?php
+
 namespace App\Exports;
 
 use App\Models\Livro;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 
-class LivrosExport implements FromCollection, WithHeadings
+class LivrosExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return Livro::with('editora','autores')->get()->map(function($l){
-            return [
-                'isbn' => $l->isbn,
-                'nome' => $l->nome,
-                'editora' => $l->editora->nome ?? '',
-                'autores' => $l->autores->pluck('nome')->implode(', '),
-                'preco' => $l->preco,
-            ];
-        });
+        return Livro::with(['editora', 'autores'])->get();
     }
 
     public function headings(): array
     {
-        return ['ISBN','Nome','Editora','Autores','Preço'];
+        return [
+            'ISBN',
+            'Nome',
+            'Editora',
+            'Autores',
+            'Bibliografia',
+            'Preço (€)',
+        ];
+    }
+
+    public function map($livro): array
+    {
+        return [
+            $livro->isbn,
+            $livro->nome,
+            $livro->editora->nome,
+            $livro->autores->pluck('nome')->implode(', '),
+            $livro->bibliografia,
+            number_format($livro->preco, 2, ',', ' '),
+        ];
     }
 }

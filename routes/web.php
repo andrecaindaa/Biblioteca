@@ -20,8 +20,8 @@ Route::middleware(['auth'])->group(function () {
 
    // Autores
 Route::get('/autores', Autores::class)->name('autores.index');
-Route::get('/autores/create', fn() => view('autores.create'))->name('autores.create');
-Route::get('/autores/{autor}/edit', fn(App\Models\Autor $autor) => view('autores.edit', compact('autor')))->name('autores.edit');
+    Route::get('/autores/create', AutorForm::class)->name('autores.create');
+    Route::get('/autores/{autor}/edit', AutorForm::class)->name('autores.edit');
 
 // Editoras
 Route::get('/editoras', Editoras::class)->name('editoras.index');
@@ -31,7 +31,7 @@ Route::get('/editoras/{editora}/edit', fn(App\Models\Editora $editora) => view('
 
 // Livros
 Route::get('/livros', Livros::class)->name('livros.index');
-Route::get('/livros/create', fn() => view('livros.create'))->name('livros.create');
-Route::get('/livros/{livro}/edit', fn(App\Models\Livro $livro) => view('livros.edit', compact('livro')))->name('livros.edit');
+    Route::get('/livros/create', LivroForm::class)->name('livros.create');
+    Route::get('/livros/{livro}/edit', LivroForm::class)->name('livros.edit');
 
 });

@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;

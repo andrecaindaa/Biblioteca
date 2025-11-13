@@ -9,7 +9,6 @@ use App\Models\Livro;
 use App\Exports\LivrosExport;
 use Maatwebsite\Excel\Facades\Excel;
 
-
 class Livros extends Component
 {
     use WithPagination;
@@ -17,9 +16,25 @@ class Livros extends Component
     #[Url]
     public $search = '';
 
+    #[Url]
+    public $sortField = 'nome';
+
+    #[Url]
+    public $sortDirection = 'asc';
+
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+        $this->sortField = $field;
     }
 
     public function delete($id)
@@ -46,7 +61,7 @@ class Livros extends Component
         $livros = Livro::with(['editora', 'autores'])
             ->where('nome', 'like', '%' . $this->search . '%')
             ->orWhere('isbn', 'like', '%' . $this->search . '%')
-            ->orderBy('nome')
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
         return view('livewire.livros', [

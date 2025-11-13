@@ -44,9 +44,15 @@
         <table class="table table-zebra w-full">
             <thead>
                 <tr class="bg-base-300">
-                    <th class="w-8/12">Nome</th>
-                    <th class="w-2/12">Logotipo</th>
-                    <th class="w-2/12 text-right">Ações</th>
+                    <th wire:click="sortBy('nome')" class="cursor-pointer hover:bg-base-200">
+                        Nome
+                        @if($sortField === 'nome')
+                            @if($sortDirection === 'asc') ↑ @else ↓ @endif
+                        @endif
+                    </th>
+                    <th>Logotipo</th>
+                    <th>Notas</th>
+                    <th class="text-right">Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -71,6 +77,17 @@
                             @endif
                         </td>
                         <td>
+                            @if($editora->notas)
+                                <div class="tooltip" data-tip="{{ $editora->notas }}">
+                                    <span class="text-sm text-base-600 truncate max-w-xs block">
+                                        {{ Str::limit($editora->notas, 50) }}
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-sm text-base-400">Sem notas</span>
+                            @endif
+                        </td>
+                        <td>
                             <div class="flex gap-2 justify-end">
                                 <a href="{{ route('editoras.edit', $editora->id) }}"
                                    class="btn btn-sm btn-info">
@@ -87,7 +104,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="text-center py-8">
+                        <td colspan="4" class="text-center py-8">
                             <div class="flex flex-col items-center justify-center text-base-500">
                                 <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>

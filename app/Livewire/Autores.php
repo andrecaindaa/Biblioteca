@@ -17,9 +17,25 @@ class Autores extends Component
     #[Url]
     public $search = '';
 
+    #[Url]
+    public $sortField = 'nome';
+
+    #[Url]
+    public $sortDirection = 'asc';
+
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+        $this->sortField = $field;
     }
 
     public function delete($id)
@@ -39,7 +55,7 @@ class Autores extends Component
     public function render()
     {
         $autores = Autor::where('nome', 'like', '%' . $this->search . '%')
-            ->orderBy('nome')
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
         return view('livewire.autores', [

@@ -25,9 +25,8 @@ Route::get('/autores', Autores::class)->name('autores.index');
 
 // Editoras
 Route::get('/editoras', Editoras::class)->name('editoras.index');
-Route::get('/editoras/create', \App\Livewire\EditoraForm::class)->name('editoras.create');
-
-Route::get('/editoras/{editora}/edit', fn(App\Models\Editora $editora) => view('editoras.edit', compact('editora')))->name('editoras.edit');
+    Route::get('/editoras/create', EditoraForm::class)->name('editoras.create');
+    Route::get('/editoras/{editora}/edit', EditoraForm::class)->name('editoras.edit');
 
 // Livros
 Route::get('/livros', Livros::class)->name('livros.index');

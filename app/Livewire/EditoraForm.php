@@ -16,11 +16,13 @@ class EditoraForm extends Component
     public $editoraId;
     public $nome;
     public $logotipo;
+    public $notas;
     public $isEditing = false;
 
     protected $rules = [
         'nome' => 'required|string|max:255',
         'logotipo' => 'nullable|image|max:2048',
+        'notas' => 'nullable|string|max:1000',
     ];
 
     public function mount($editora = null)
@@ -31,6 +33,7 @@ class EditoraForm extends Component
             if ($editoraModel) {
                 $this->editoraId = $editoraModel->id;
                 $this->nome = $editoraModel->nome;
+                $this->notas = $editoraModel->notas;
                 $this->isEditing = true;
             } else {
                 session()->flash('error', 'Editora não encontrada.');
@@ -50,9 +53,9 @@ class EditoraForm extends Component
         }
 
         $editora->nome = $this->nome;
+        $editora->notas = $this->notas;
 
         if ($this->logotipo) {
-            // Deletar logotipo antigo se existir
             if ($editora->logotipo && Storage::disk('public')->exists($editora->logotipo)) {
                 Storage::disk('public')->delete($editora->logotipo);
             }

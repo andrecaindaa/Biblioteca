@@ -9,7 +9,7 @@
                 <!-- Nome -->
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text font-semibold">Nome da Editora</span>
+                        <span class="label-text font-semibold">Nome da Editora *</span>
                     </label>
                     <input
                         type="text"
@@ -18,6 +18,24 @@
                         placeholder="Digite o nome da editora"
                     />
                     @error('nome')
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </label>
+                    @enderror
+                </div>
+
+                <!-- Notas -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Notas</span>
+                    </label>
+                    <textarea
+                        wire:model="notas"
+                        class="textarea textarea-bordered w-full @error('notas') textarea-error @enderror"
+                        placeholder="Adicione notas sobre a editora..."
+                        rows="4"
+                    ></textarea>
+                    @error('notas')
                         <label class="label">
                             <span class="label-text-alt text-error">{{ $message }}</span>
                         </label>
@@ -47,14 +65,14 @@
                             <p class="text-sm text-base-600 mb-2">Pré-visualização do novo logotipo:</p>
                             <img src="{{ $logotipo->temporaryUrl() }}" class="w-32 h-32 object-contain rounded-lg border">
                         </div>
-                    @elseif($isEditing && $editoraId)
+                    @elseif($isEditing)
                         @php
-                            $editora = \App\Models\Editora::find($editoraId);
+                            $editoraAtual = \App\Models\Editora::find($editoraId);
                         @endphp
-                        @if($editora && $editora->logotipo)
+                        @if($editoraAtual && $editoraAtual->logotipo)
                             <div class="mt-4">
                                 <p class="text-sm text-base-600 mb-2">Logotipo atual:</p>
-                                <img src="{{ asset('storage/' . $editora->logotipo) }}"
+                                <img src="{{ asset('storage/' . $editoraAtual->logotipo) }}"
                                      class="w-32 h-32 object-contain rounded-lg border">
                             </div>
                         @endif

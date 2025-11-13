@@ -10,48 +10,120 @@
                 </svg>
                 Exportar Excel
             </button>
-            <a href="{{ route('livros.create') }}" class="btn btn-primary">+ Novo Livro</a>
+            <a href="{{ route('livros.create') }}" class="btn btn-primary">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Novo Livro
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra de Pesquisa -->
+    <div class="card bg-base-200 p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <div class="form-control flex-1">
+                <input
+                    type="text"
+                    placeholder="Pesquisar por título ou ISBN..."
+                    class="input input-bordered w-full"
+                    wire:model.live="search"
+                >
+            </div>
+            <div class="text-sm text-base-600">
+                {{ $livros->total() }} livro(s) encontrado(s)
+            </div>
         </div>
     </div>
 
     @if (session()->has('message'))
-        <div class="alert alert-success mb-4">{{ session('message') }}</div>
+        <div class="alert alert-success mb-6 shadow-lg">
+            <div>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>{{ session('message') }}</span>
+            </div>
+        </div>
     @endif
 
-    <div class="overflow-x-auto">
-        <table class="table w-full">
+    <!-- Tabela -->
+    <div class="overflow-x-auto bg-base-100 rounded-lg shadow">
+        <table class="table table-zebra w-full">
             <thead>
-                <tr>
-                    <th>Título</th>
-                    <th>ISBN</th>
+                <tr class="bg-base-300">
+                    <th wire:click="sortBy('nome')" class="cursor-pointer hover:bg-base-200">
+                        Título
+                        @if($sortField === 'nome')
+                            @if($sortDirection === 'asc') ↑ @else ↓ @endif
+                        @endif
+                    </th>
+                    <th wire:click="sortBy('isbn')" class="cursor-pointer hover:bg-base-200">
+                        ISBN
+                        @if($sortField === 'isbn')
+                            @if($sortDirection === 'asc') ↑ @else ↓ @endif
+                        @endif
+                    </th>
                     <th>Editora</th>
-                    <th>Preço</th>
+                    <th wire:click="sortBy('preco')" class="cursor-pointer hover:bg-base-200">
+                        Preço
+                        @if($sortField === 'preco')
+                            @if($sortDirection === 'asc') ↑ @else ↓ @endif
+                        @endif
+                    </th>
                     <th class="text-right">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($livros as $livro)
                     <tr>
-                        <td>{{ $livro->nome }}</td>
-                        <td>{{ $livro->isbn }}</td>
-                        <td>{{ $livro->editora?->nome }}</td>
-                        <td>{{ number_format($livro->preco, 2, ',', '.') }} €</td>
-                        <td class="text-right">
-                            <a href="{{ route('livros.edit', $livro->id) }}" class="btn btn-sm btn-info">Editar</a>
-                            <button wire:click="delete({{ $livro->id }})" class="btn btn-sm btn-error">Eliminar</button>
+                        <td class="font-semibold">{{ $livro->nome }}</td>
+                        <td class="font-mono text-sm">{{ $livro->isbn }}</td>
+                        <td>
+                            @if($livro->editora)
+                                <span class="badge badge-outline">{{ $livro->editora->nome }}</span>
+                            @else
+                                <span class="text-base-400 text-sm">Sem editora</span>
+                            @endif
+                        </td>
+                        <td class="font-mono">{{ number_format($livro->preco, 2, ',', '.') }} €</td>
+                        <td>
+                            <div class="flex gap-2 justify-end">
+                                <a href="{{ route('livros.edit', $livro->id) }}" class="btn btn-sm btn-info">
+                                    Editar
+                                </a>
+                                <button
+                                    wire:click="delete({{ $livro->id }})"
+                                    wire:confirm="Tem a certeza que deseja eliminar o livro '{{ $livro->nome }}'?"
+                                    class="btn btn-sm btn-error">
+                                    Eliminar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center">Nenhum livro encontrado.</td>
+                        <td colspan="5" class="text-center py-8">
+                            <div class="flex flex-col items-center justify-center text-base-500">
+                                <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                <p class="text-lg">Nenhum livro encontrado</p>
+                                @if($search)
+                                    <p class="text-sm mt-2">Tente alterar os termos da pesquisa</p>
+                                @else
+                                    <p class="text-sm mt-2">Clique em "Novo Livro" para adicionar o primeiro</p>
+                                @endif
+                            </div>
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <div class="mt-4">
+    <!-- Paginação -->
+    <div class="mt-6">
         {{ $livros->links() }}
     </div>
 </div>
-

@@ -17,16 +17,31 @@ class Editoras extends Component
     #[Url]
     public $search = '';
 
+    #[Url]
+    public $sortField = 'nome';
+
+    #[Url]
+    public $sortDirection = 'asc';
+
     public function updatingSearch()
     {
         $this->resetPage();
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+        $this->sortField = $field;
     }
 
     public function delete($id)
     {
         $editora = Editora::findOrFail($id);
 
-        // Deletar logotipo se existir
         if ($editora->logotipo && Storage::disk('public')->exists($editora->logotipo)) {
             Storage::disk('public')->delete($editora->logotipo);
         }
@@ -39,7 +54,7 @@ class Editoras extends Component
     public function render()
     {
         $editoras = Editora::where('nome', 'like', '%' . $this->search . '%')
-            ->orderBy('nome')
+            ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
 
         return view('livewire.editoras', [

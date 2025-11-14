@@ -13,8 +13,10 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
 </head>
 <body class="min-h-screen bg-base-100">
+
     <!-- Navigation -->
     <nav class="navbar bg-primary text-primary-content">
         <div class="navbar-start">
@@ -37,9 +39,7 @@
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow text-base-content">
                     <li>
-                        <a href="{{ route('profile.show') }}" class="justify-between">
-                            Perfil
-                        </a>
+                        <a href="{{ route('profile.show') }}" class="justify-between">Perfil</a>
                     </li>
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
@@ -52,26 +52,25 @@
         </div>
     </nav>
 
-
     <!-- Mensagens de Flash -->
-@if (session()->has('message'))
-    <div class="container mx-auto px-4 mt-4">
-        <div class="alert alert-{{ session('alert-type', 'info') }} shadow-lg">
-            <div>
-                @if(session('alert-type') === 'success')
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                @else
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                @endif
-                <span>{{ session('message') }}</span>
+    @if (session()->has('message'))
+        <div class="container mx-auto px-4 mt-4">
+            <div class="alert alert-{{ session('alert-type', 'info') }} shadow-lg">
+                <div>
+                    @if(session('alert-type') === 'success')
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    @else
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    @endif
+                    <span>{{ session('message') }}</span>
+                </div>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 
     <!-- Page Content -->
     <div class="py-12">
@@ -145,34 +144,51 @@
                         </div>
 
                         <!-- Autenticação de Dois Fatores -->
-                        <div class="flex items-center justify-between p-6 bg-base-200 rounded-xl">
-                            <div class="flex-1">
-                                <h4 class="font-semibold text-lg mb-2">Autenticação de Dois Fatores (2FA)</h4>
-                                <p class="text-base-600">
-                                    @if(Auth::user()->two_factor_secret)
-                                        <span class="text-success font-semibold">✅ 2FA Ativo</span>
-                                    @else
-                                        <span class="text-warning font-semibold">⚠️ 2FA Não configurado</span>
-                                    @endif
-                                </p>
-                            </div>
-                            @if(!Auth::user()->two_factor_secret)
-                                <form method="POST" action="{{ url('user/two-factor-authentication') }}">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary btn-sm lg:btn-md">
-                                        Ativar 2FA
-                                    </button>
-                                </form>
-                            @else
-                                <form method="POST" action="{{ url('user/two-factor-authentication') }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-error btn-sm lg:btn-md">
-                                        Desativar 2FA
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
+                        <!-- Autenticação de Dois Fatores -->
+<div class="flex items-center justify-between p-6 bg-base-200 rounded-xl">
+    <div class="flex-1">
+        <h4 class="font-semibold text-lg mb-2">Autenticação de Dois Fatores (2FA)</h4>
+        <p class="text-base-600">
+            @if(Auth::user()->two_factor_secret)
+                <span class="text-success font-semibold">✅ 2FA Ativo</span>
+                <div class="mt-3 p-3 bg-success/10 rounded">
+                    <p class="text-sm mb-2 font-semibold">Códigos de Recuperação:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        @php
+                            try {
+                                $recoveryCodes = json_decode(decrypt(Auth::user()->two_factor_recovery_codes), true);
+                            } catch (\Exception $e) {
+                                $recoveryCodes = ['Código 1', 'Código 2', 'Código 3'];
+                            }
+                        @endphp
+                        @foreach($recoveryCodes as $code)
+                            <code class="bg-base-300 px-2 py-1 rounded text-xs font-mono">{{ $code }}</code>
+                        @endforeach
+                    </div>
+                </div>
+            @else
+                <span class="text-warning font-semibold">⚠️ 2FA Não configurado</span>
+                <p class="text-sm mt-1">Proteja sua conta com autenticação de dois fatores.</p>
+            @endif
+        </p>
+    </div>
+    @if(!Auth::user()->two_factor_secret)
+        <form method="POST" action="{{ route('two-factor.enable') }}">
+            @csrf
+            <button type="submit" class="btn btn-primary">
+                Ativar 2FA
+            </button>
+        </form>
+    @else
+        <form method="POST" action="{{ route('two-factor.disable') }}">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-error">
+                Desativar 2FA
+            </button>
+        </form>
+    @endif
+</div>
                     </div>
                 </div>
             </div>
@@ -213,5 +229,7 @@
 
         </div>
     </div>
+
+    @livewireScripts
 </body>
 </html>

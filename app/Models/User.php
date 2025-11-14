@@ -50,13 +50,19 @@ class User extends Authenticatable
     /**
      * Retorna iniciais do utilizador
      */
-    public function initials(): string
+    public function initials()
     {
-        $parts = explode(' ', $this->name);
+        $name = $this->name;
         $initials = '';
-        foreach ($parts as $p) {
-            $initials .= strtoupper(substr($p, 0, 1));
+
+        $names = explode(' ', $name);
+        foreach ($names as $n) {
+            if (!empty(trim($n))) {
+                $initials .= strtoupper($n[0]);
+                if (strlen($initials) >= 2) break;
+            }
         }
-        return $initials;
+
+        return $initials ?: 'U';
     }
 }

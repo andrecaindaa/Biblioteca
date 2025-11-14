@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Models\Livro;
 use App\Models\Editora;
 use App\Models\Autor;
@@ -26,7 +27,7 @@ class LivroForm extends Component
     public $isEditing = false;
 
     protected $rules = [
-        'isbn' => 'required|string|max:20|unique:livros,isbn',
+        'isbn' => 'required|string|max:20',
         'nome' => 'required|string|max:255',
         'editora_id' => 'required|exists:editoras,id',
         'autoresSelecionados' => 'required|array|min:1',
@@ -37,8 +38,16 @@ class LivroForm extends Component
 
     public function mount($livro = null)
     {
+        // DEBUG: Verifique o que está chegando
+        Log::info('LivroForm mount called with:', ['livro' => $livro]);
+
         if ($livro) {
-            $livroModel = Livro::with('autores')->find($livro);
+            // Se for um ID, buscar o livro
+            if (is_numeric($livro)) {
+                $livroModel = Livro::with('autores')->find($livro);
+            } else {
+                $livroModel = $livro;
+            }
 
             if ($livroModel) {
                 $this->livroId = $livroModel->id;
@@ -56,6 +65,9 @@ class LivroForm extends Component
                 session()->flash('error', 'Livro não encontrado.');
                 return $this->redirectRoute('livros.index', navigate: true);
             }
+        } else {
+            // Modo criação - manter regra unique
+            $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn';
         }
     }
 

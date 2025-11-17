@@ -82,6 +82,16 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('profile.show');
     })->name('two-factor.disable');
 
+
+    // Requisições
+Route::post('/livros/{livro}/requisitar', [\App\Http\Controllers\RequisicaoController::class, 'store'])
+    ->name('requisicoes.store');
+
+Route::post('/requisicoes/{requisicao}/entregar', [\App\Http\Controllers\RequisicaoController::class, 'marcarEntregue'])
+    ->middleware('can:admin') // quando criarmos roles
+    ->name('requisicoes.entregar');
+
+
     // Autores
     Route::get('/autores', Autores::class)->name('autores.index');
     Route::get('/autores/create', AutorForm::class)->name('autores.create');

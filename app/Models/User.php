@@ -65,4 +65,20 @@ class User extends Authenticatable
 
         return $initials ?: 'U';
     }
+
+    public function requisicoes()
+    {
+        return $this->hasMany(Requisicao::class);
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role && $this->role->nome === 'admin';
+    }
+
 }

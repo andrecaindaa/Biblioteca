@@ -13,7 +13,7 @@ class AutorFactory extends Factory
     {
         return [
             'nome' => $this->faker->name(),
-            'foto_path' => null,
+            'foto' => null,
         ];
     }
 }

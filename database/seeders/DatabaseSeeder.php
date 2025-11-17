@@ -33,10 +33,20 @@ class DatabaseSeeder extends Seeder
             });
         }
 
-        // Criar usuário de teste
+        // Criar um admin padrão
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Administrador',
+            'email' => 'andre.cainda.524@outlook.pt',
+            'password' => bcrypt('12345678'),
+            'role_id' => 1, // admin
         ]);
+
+         // Criar usuário de teste
+          User::factory()->create([
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'role_id' => 2,
+        ]);
+
     }
 }

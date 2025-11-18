@@ -45,4 +45,14 @@ class Livro extends Model
         return $this->hasMany(Requisicao::class);
     }
 
+    public function requisicaoAtiva()
+    {
+        return $this->hasOne(Requisicao::class)->where('status', 'ativo');
+    }
+
+    public function isDisponivel(): bool
+    {
+        return $this->requisicaoAtiva()->doesntExist();
+    }
+
 }

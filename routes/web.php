@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LivroController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RequisicaoController;
+
 use App\Livewire\Livros;
 use App\Livewire\LivroForm;
 use App\Livewire\Autores;
@@ -9,13 +14,14 @@ use App\Livewire\AutorForm;
 use App\Livewire\Editoras;
 use App\Livewire\EditoraForm;
 
+
+
 // Rota inicial
 Route::get('/', fn() => redirect()->route('dashboard'));
 
-// Rotas de verificação de email
-Route::get('/email/verify', function () {
-    return view('auth.verify-email');
-})->middleware('auth')->name('verification.notice');
+// Verificação de email
+Route::get('/email/verify', fn() => view('auth.verify-email'))
+    ->middleware('auth')->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
     $request->fulfill();
@@ -25,28 +31,26 @@ Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\Em
 Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Link de verificação enviado!');
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-
-// Área autenticada
-Route::middleware(['auth'])->group(function () {
+})->middleware(['auth','throttle:6,1'])->name('verification.send');
 
 
-    // TESTE DE EMAIL
-    Route::get('/test-email', function () {
-        Mail::raw('Este é um e-mail de teste enviado pelo Laravel usando Mailtrap.', function ($message) {
-            $message->to('andretchipalavela@gmail.com')
-                    ->subject('📚 Teste de Email - Biblioteca');
-        });
-
-        return 'Email enviado! Verifica a tua caixa de entrada.';
-    });
+// ÁREA AUTENTICADA
+Route::middleware('auth')->group(function () {
 
     // Dashboard
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    // Perfil do Utilizador
+    // Teste email
+    Route::get('/test-email', function () {
+        Mail::raw('Teste email Laravel', fn($message) => $message->to('andretchipalavela@gmail.com')
+            ->subject('📚 Teste de Email - Biblioteca'));
+        return 'Email enviado!';
+    });
+
+    // Perfil
     Route::view('/user/profile', 'profile.show')->name('profile.show');
 
+    // 2FA
     // Rotas do 2FA - CORRIGIDAS
     Route::post('/user/two-factor-authentication', function (\Illuminate\Http\Request $request) {
         $user = $request->user();
@@ -82,27 +86,34 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('profile.show');
     })->name('two-factor.disable');
 
+    // REQUISIÇÕES (Cidadãos + Admin)
+    Route::post('/livros/{livro}/requisitar', [RequisicaoController::class, 'store'])->name('requisicoes.store');
 
-    // Requisições
-Route::post('/livros/{livro}/requisitar', [\App\Http\Controllers\RequisicaoController::class, 'store'])
-    ->name('requisicoes.store');
+    Route::post('/requisicoes/{requisicao}/entregar', [RequisicaoController::class, 'marcarEntregue'])
+        ->middleware('can:admin')
+        ->name('requisicoes.entregar');
 
-Route::post('/requisicoes/{requisicao}/entregar', [\App\Http\Controllers\RequisicaoController::class, 'marcarEntregue'])
-    ->middleware('can:admin') // quando criarmos roles
-    ->name('requisicoes.entregar');
+    // USERS (Admin)
+    Route::middleware('admin')->group(function () {
+        Route::resource('users', UserController::class);
+        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
+        // LIVROS (CRUD)
+        Route::resource('livros', LivroController::class)->except(['index','show']);
+    });
 
-    // Autores
+    // REQUISIÇÕES (listar, detalhes)
+    Route::resource('requisicoes', RequisicaoController::class)->only(['index','show']);
+
+    // LIVEWIRE
     Route::get('/autores', Autores::class)->name('autores.index');
     Route::get('/autores/create', AutorForm::class)->name('autores.create');
     Route::get('/autores/{autor}/edit', AutorForm::class)->name('autores.edit');
 
-    // Editoras
     Route::get('/editoras', Editoras::class)->name('editoras.index');
     Route::get('/editoras/create', EditoraForm::class)->name('editoras.create');
     Route::get('/editoras/{editora}/edit', EditoraForm::class)->name('editoras.edit');
 
-    // Livros
     Route::get('/livros', Livros::class)->name('livros.index');
     Route::get('/livros/create', LivroForm::class)->name('livros.create');
     Route::get('/livros/{livro}/edit', LivroForm::class)->name('livros.edit');

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,8 +22,6 @@ class UserFactory extends Factory
 
     /**
      * Define the model's default state.
-     *
-     * @return array<string, mixed>
      */
     public function definition(): array
     {
@@ -36,21 +35,44 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'profile_photo_path' => null,
             'current_team_id' => null,
+            'role_id' => Role::factory(), // cria role automaticamente nos testes
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Disable two factor authentication.
+     */
+    public function withoutTwoFactor(): static
+    {
+        return $this->state(fn () => [
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+        ]);
+    }
+
+    /**
+     * Enable two factor authentication (usado pelos testes).
+     */
+    public function withTwoFactor(): static
+    {
+        return $this->state(fn () => [
+            'two_factor_secret' => encrypt('dummy-secret'),
+            'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
+        ]);
+    }
+
+    /**
+     * Mark email as unverified.
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn () => [
             'email_verified_at' => null,
         ]);
     }
 
     /**
-     * Indicate that the user should have a personal team.
+     * Add personal team if Jetstream team features are enabled.
      */
     public function withPersonalTeam(?callable $callback = null): static
     {
@@ -61,7 +83,7 @@ class UserFactory extends Factory
         return $this->has(
             Team::factory()
                 ->state(fn (array $attributes, User $user) => [
-                    'name' => $user->name.'\'s Team',
+                    'name' => $user->name . "'s Team",
                     'user_id' => $user->id,
                     'personal_team' => true,
                 ])

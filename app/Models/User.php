@@ -77,9 +77,15 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function isAdmin(): bool
-    {
-        return $this->role && $this->role->nome === 'admin';
+   public function isAdmin(): bool
+{
+    // 1) Se role_id estiver definido e for 1 (convenção usada nas migrations)
+    if ($this->role_id === 1) {
+        return true;
     }
+
+    // 2) fallback: se existir relação role, comparar o nome case-insensitive
+    return (bool) ($this->role && strtolower($this->role->nome) === 'admin');
+}
 
 }

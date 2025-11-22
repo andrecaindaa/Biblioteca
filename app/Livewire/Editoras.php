@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Editora;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Editoras')]
 class Editoras extends Component
@@ -22,6 +23,14 @@ class Editoras extends Component
 
     #[Url]
     public $sortDirection = 'asc';
+
+     public function mount()
+    {
+        // ✅ VERIFICAÇÃO DE ADMIN (CORRIGIDA)
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
+    }
 
     public function updatingSearch()
     {

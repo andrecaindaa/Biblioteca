@@ -37,6 +37,15 @@ Route::post('/email/verification-notification', function (\Illuminate\Http\Reque
 // ÁREA AUTENTICADA
 Route::middleware('auth')->group(function () {
 
+    // Catálogo público
+Route::get('/catalogo', \App\Livewire\Catalogo::class)->name('catalogo.index');
+Route::get('/catalogo/{livro}', \App\Livewire\CatalogoShow::class)->name('catalogo.show');
+
+      // Gestão de requisições (Admin)
+        Route::post('/requisicoes/{requisicao}/entregar', [RequisicaoController::class,'marcarEntregue'])
+            ->name('requisicoes.entregar');
+
+
     // Dashboard
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 

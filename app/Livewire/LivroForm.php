@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Livro;
 use App\Models\Editora;
 use App\Models\Autor;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Livros')]
 class LivroForm extends Component
@@ -38,11 +39,13 @@ class LivroForm extends Component
 
     public function mount($livro = null)
     {
-        // DEBUG: Verifique o que está chegando
-        Log::info('LivroForm mount called with:', ['livro' => $livro]);
+        // VERIFICAÇÃO DE ADMIN
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
 
+        // ... resto do código original
         if ($livro) {
-            // Se for um ID, buscar o livro
             if (is_numeric($livro)) {
                 $livroModel = Livro::with('autores')->find($livro);
             } else {
@@ -58,15 +61,12 @@ class LivroForm extends Component
                 $this->preco = $livroModel->preco;
                 $this->autoresSelecionados = $livroModel->autores->pluck('id')->toArray();
                 $this->isEditing = true;
-
-                // Remover regra unique para ISBN ao editar
                 $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn,' . $livroModel->id;
             } else {
                 session()->flash('error', 'Livro não encontrado.');
                 return $this->redirectRoute('livros.index', navigate: true);
             }
         } else {
-            // Modo criação - manter regra unique
             $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn';
         }
     }

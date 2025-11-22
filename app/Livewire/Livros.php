@@ -8,6 +8,7 @@ use Livewire\Attributes\Url;
 use App\Models\Livro;
 use App\Exports\LivrosExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class Livros extends Component
 {
@@ -21,6 +22,14 @@ class Livros extends Component
 
     #[Url]
     public $sortDirection = 'asc';
+/*
+    public function mount()
+    {
+        // VERIFICAÇÃO DE ADMIN
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
+    }*/
 
     public function updatingSearch()
     {

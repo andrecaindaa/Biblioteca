@@ -4,15 +4,25 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // <--- Certifica-te que isto está presente
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        // Verifica se o utilizador está autenticado e se é admin
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
-            abort(403, 'Acesso negado. Apenas administradores.');
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        $user = Auth::user();
+
+        if (!$user->relationLoaded('role')) {
+            $user->load('role');
+        }
+
+        if (!$user->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
         }
 
         return $next($request);

@@ -7,12 +7,13 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Autor;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Autores')]
 class AutorForm extends Component
 {
     use WithFileUploads;
-
+protected $middleware = ['auth', 'admin'];
     public $autorId;
     public $nome;
     public $foto;
@@ -25,9 +26,13 @@ class AutorForm extends Component
 
     public function mount($autor = null)
     {
+        // VERIFICAÇÃO DE ADMIN
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
+
         if ($autor) {
             $autorModel = Autor::find($autor);
-
             if ($autorModel) {
                 $this->autorId = $autorModel->id;
                 $this->nome = $autorModel->nome;

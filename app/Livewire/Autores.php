@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Autor;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Autores')]
 class Autores extends Component
@@ -22,6 +23,14 @@ class Autores extends Component
 
     #[Url]
     public $sortDirection = 'asc';
+
+     public function mount()
+    {
+        //VERIFICAÇÃO DE ADMIN
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
+    }
 
     public function updatingSearch()
     {

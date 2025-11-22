@@ -15,7 +15,15 @@
 
                 <div class="card-body">
                     <h5 class="card-title">{{ $requisicao->livro->nome }}</h5>
-                    <p class="text-muted">Autor: {{ $requisicao->livro->autor->nome }}</p>
+                    <p class="text-muted">
+                        Autor:
+                        @forelse($requisicao->livro->autores as $autor)
+                            {{ $autor->nome }}@if(!$loop->last), @endif
+                        @empty
+                            — Sem autores registados
+                        @endforelse
+                    </p>
+
 
                     @if($requisicao->status === 'ativo')
                         <span class="badge bg-success">Ativo</span>

@@ -8,13 +8,19 @@
     <div class="row mt-4">
         <div class="col-md-4">
             @if($livro->capa)
-                <img src="{{ asset('storage/' . $livro->capa) }}" class="img-fluid rounded shadow">
+                <img src="{{ asset('storage/' . $livro->capa) }}" class="img-fluid rounded shadow" alt="Capa do livro {{ $livro->nome }}">
+            @else
+                <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                    <span class="text-muted">Sem capa disponível</span>
+                </div>
             @endif
         </div>
 
         <div class="col-md-8">
-            <p><strong>Autor:</strong> {{ $livro->autor->nome }}</p>
-            <p><strong>Editora:</strong> {{ $livro->editora->nome }}</p>
+
+            <p><strong>Autor(es):</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
+
+            <p><strong>Editora:</strong> {{ $livro->editora->nome ?? '—' }}</p>
 
             <p><strong>Status:</strong>
                 @if($livro->isDisponivel())
@@ -24,11 +30,16 @@
                 @endif
             </p>
 
+            {{-- Botão Requisitar --}}
             @if($livro->isDisponivel())
-                <a href="{{ route('users.requisitar.view', $livro->id) }}" class="btn btn-success">
-                    Requisitar Livro
-                </a>
+                <form action="{{ route('requisicoes.store', $livro->id) }}" method="POST" class="mt-3">
+                    @csrf
+                    <button class="btn btn-success">
+                        Requisitar Livro
+                    </button>
+                </form>
             @endif
+
         </div>
     </div>
 

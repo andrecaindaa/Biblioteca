@@ -55,4 +55,10 @@ class Livro extends Model
         return $this->requisicaoAtiva()->doesntExist();
     }
 
+    public function getCapaAttribute()
+{
+
+    return $this->attributes['imagem_capa'] ?? null;
+}
+
 }

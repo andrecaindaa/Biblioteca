@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Editora;
+use Illuminate\Support\Facades\Auth;
 
 #[Title('Editoras')]
 class EditoraForm extends Component
@@ -27,9 +28,13 @@ class EditoraForm extends Component
 
     public function mount($editora = null)
     {
+        // VERIFICAÇÃO DE ADMIN
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            abort(403, 'Acesso reservado a administradores.');
+        }
+
         if ($editora) {
             $editoraModel = Editora::find($editora);
-
             if ($editoraModel) {
                 $this->editoraId = $editoraModel->id;
                 $this->nome = $editoraModel->nome;

@@ -7,20 +7,50 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-base-200 min-h-screen">
-    <div class="navbar bg-primary text-primary-content">
-        <div class="flex-1 px-2 text-xl font-bold">📚 Biblioteca</div>
-        <div class="flex-none">
-            <ul class="menu menu-horizontal px-1">
-                <li><a href="/">Início</a></li>
-                <li><a href="/livros">Livros</a></li>
-                <li><a href="/autores">Autores</a></li>
-                <li><a href="/editoras">Editoras</a></li>
-            </ul>
-        </div>
+
+<div class="navbar bg-primary text-primary-content">
+    <div class="flex-1 px-2 text-xl font-bold">📚 Biblioteca</div>
+    <div class="flex-none">
+        <ul class="menu menu-horizontal px-1">
+            <li><a href="{{ route('dashboard') }}">Início</a></li>
+            <li><a href="{{ route('catalogo.index') }}">Catálogo</a></li>
+            <li><a href="{{ route('requisicoes.index') }}">Requisições</a></li>
+
+            @auth
+                @if(auth()->user()->isAdmin())
+                    @if(Route::has('livros.index'))
+                        <li><a href="{{ route('livros.index') }}">Livros</a></li>
+                    @endif
+                    @if(Route::has('autores.index'))
+                        <li><a href="{{ route('autores.index') }}">Autores</a></li>
+                    @endif
+                    @if(Route::has('editoras.index'))
+                        <li><a href="{{ route('editoras.index') }}">Editoras</a></li>
+                    @endif
+                    @if(Route::has('users.index'))
+                        <li><a href="{{ route('users.index') }}">Utilizadores</a></li>
+                    @endif
+                @endif
+
+                <li><a href="{{ route('profile.show') }}">Perfil</a></li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost">Sair</button>
+                    </form>
+                </li>
+            @else
+                <li><a href="{{ route('login') }}">Login</a></li>
+                <li><a href="{{ route('register') }}">Registo</a></li>
+            @endauth
+        </ul>
     </div>
+</div>
+
 
     <div class="p-6">
         @yield('content')
     </div>
+
 </body>
 </html>

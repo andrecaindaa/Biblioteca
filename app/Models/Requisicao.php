@@ -40,26 +40,24 @@ class Requisicao extends Model
         return $this->belongsTo(Livro::class);
     }
 
-    /**
- * Gera o próximo número sequencial da requisição
- */
-public static function gerarNumeroSequencial(): string
-{
-    // Vai buscar a última requisição criada
-    $ultimo = self::orderBy('id', 'desc')->first();
-
-    if (!$ultimo) {
-        return 'REC-0001';
+    /** Escopo para requisições ativas */
+    public function scopeAtivas($query)
+    {
+        return $query->where('status', 'ativo');
     }
 
-    // Extrair o número atual (REC-0007 → 7)
-    $numeroAtual = (int) str_replace('REC-', '', $ultimo->numero);
+    /** Gera o próximo número sequencial da requisição */
+    public static function gerarNumeroSequencial(): string
+    {
+        $ultimo = self::orderBy('id', 'desc')->first();
 
-    // Incrementar +1
-    $novo = $numeroAtual + 1;
+        if (!$ultimo) {
+            return 'REC-0001';
+        }
 
-    // Formatado com 4 dígitos
-    return 'REC-' . str_pad($novo, 4, '0', STR_PAD_LEFT);
-}
+        $numeroAtual = (int) str_replace('REC-', '', $ultimo->numero);
+        $novo = $numeroAtual + 1;
 
+        return 'REC-' . str_pad($novo, 4, '0', STR_PAD_LEFT);
+    }
 }

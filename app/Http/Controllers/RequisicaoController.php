@@ -19,13 +19,14 @@ class RequisicaoController extends Controller
     public function store(Request $request, Livro $livro)
     {
         $user = Auth::user();
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Administradores não podem fazer requisições.');
+        }
 
-        // Livro disponível?
         if (!$livro->isDisponivel()) {
             return back()->with('error', 'Este livro já está requisitado.');
         }
 
-        // Limite de 3 livros simultâneos
         $requisicoesAtivas = Requisicao::where('user_id', $user->id)
             ->where('status', 'ativo')
             ->count();
@@ -34,7 +35,6 @@ class RequisicaoController extends Controller
             return back()->with('error', 'Você atingiu o limite de 3 livros requisitados.');
         }
 
-        // Criar requisição
         $requisicao = Requisicao::create([
             'user_id' => $user->id,
             'livro_id' => $livro->id,
@@ -44,10 +44,12 @@ class RequisicaoController extends Controller
             'status' => 'ativo',
         ]);
 
-        // Enviar email para usuário e Admins
+
         Mail::to($user->email)->send(new NovaRequisicaoMail($requisicao));
 
-        $admins = User::where('role', 'admin')->get(); // supondo coluna 'role'
+        //$admins = User::where('role', 'admin')->get();
+        $admins = User::where('role_id', 1)->get();
+
         foreach ($admins as $admin) {
             Mail::to($admin->email)->send(new NovaRequisicaoMail($requisicao));
         }
@@ -65,9 +67,10 @@ class RequisicaoController extends Controller
             'data_entrega_real' => today(),
         ]);
 
-        // Enviar email de confirmação
-        $admins = User::where('role', 'admin')->get();
-        Mail::to($requisicao->user->email)->send(new ConfirmacaoEntregaMail($requisicao));
+        $admins = User::where('role_id', 1)->get();
+
+        //$admins = User::where('role', 'admin')->get();
+        Mail::to($requisicao->user?->email)->send(new ConfirmacaoEntregaMail($requisicao));
         foreach ($admins as $admin) {
             Mail::to($admin->email)->send(new ConfirmacaoEntregaMail($requisicao));
         }
@@ -100,13 +103,35 @@ class RequisicaoController extends Controller
      */
     public function show(Requisicao $requisicao)
     {
+        $this->authorize('view', $requisicao);
+
+        /*
         $user = Auth::user();
 
         if (!$user->isAdmin() && $requisicao->user_id !== $user->id) {
             abort(403, 'Não autorizado.');
         }
+*/
+        // Garante que sempre há um livro e um usuário associados
+        $requisicao->load([
+            'livro.autores',
+            'user'
+        ]);
 
-        $requisicao->load(['livro.autores', 'user']);
+        // Cria objetos fallback caso estejam ausentes
+        if (!$requisicao->livro) {
+            $requisicao->livro = new Livro([
+                'nome' => '—',
+                'capa' => null,
+            ]);
+        }
+
+        if (!$requisicao->user) {
+            $requisicao->user = new User([
+                'name' => '—',
+                'email' => '—',
+            ]);
+        }
 
         return view('requisicoes.show', compact('requisicao'));
     }

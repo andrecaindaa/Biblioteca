@@ -39,7 +39,7 @@ protected $middleware = ['auth', 'admin'];
                 $this->isEditing = true;
             } else {
                 session()->flash('error', 'Autor não encontrado.');
-                return $this->redirectRoute('autores.index', navigate: true);
+                return $this->redirectRoute('admin.autores.index', navigate: true);
             }
         }
     }
@@ -67,7 +67,7 @@ protected $middleware = ['auth', 'admin'];
         $autor->save();
 
         session()->flash('message', $this->isEditing ? 'Autor atualizado com sucesso!' : 'Autor criado com sucesso!');
-        return $this->redirectRoute('autores.index', navigate: true);
+        return $this->redirectRoute('admin.autores.index', navigate: true);
     }
 
     public function render()

@@ -15,7 +15,7 @@ class RequisicaoPolicy
 {
     return true; // Admin vê tudo, cidadão vê as suas
 }
-
+/*
 public function view(User $user, Requisicao $req)
 {
     if ($user->role->nome === 'admin') {
@@ -24,4 +24,17 @@ public function view(User $user, Requisicao $req)
 
     return $req->user_id === $user->id;
 }
+*/
+public function view(User $user, Requisicao $req)
+{
+    // Garantir que existe role carregado
+    $user->loadMissing('role');
+
+    if ($user->isAdmin()) {
+        return true;
+    }
+
+    return $req->user_id === $user->id;
+}
+
 }

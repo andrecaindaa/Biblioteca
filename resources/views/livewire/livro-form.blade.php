@@ -66,7 +66,7 @@
             <button type="submit" class="btn btn-primary flex-1">
                 {{ $isEditing ? 'Atualizar' : 'Criar' }} Livro
             </button>
-            <a href="{{ route('livros.index') }}" class="btn btn-ghost">Cancelar</a>
+            <a href="{{ route('admin.livros.index') }}" class="btn btn-ghost">Cancelar</a>
         </div>
     </form>
 

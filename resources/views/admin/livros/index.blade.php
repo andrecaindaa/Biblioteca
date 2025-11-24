@@ -32,7 +32,7 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('livros.show', $livro->id) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.livros.show', $livro->id) }}" class="btn btn-primary btn-sm">
                         Ver
                     </a>
                 </td>

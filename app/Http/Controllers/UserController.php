@@ -16,7 +16,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('role')->get();
-        return view('users.index', compact('users'));
+        return view('admin.users.index', compact('users'));
     }
 
     /**
@@ -26,7 +26,7 @@ class UserController extends Controller
     {
         $requisicoes = $user->requisicoes()->with('livro')->latest()->get();
 
-        return view('users.show', compact('user', 'requisicoes'));
+        return view('admin.users.show', compact('user', 'requisicoes'));
     }
 
     /**
@@ -34,7 +34,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view('users.create');
+        return view('admin.users.create');
     }
 
     /**
@@ -55,14 +55,59 @@ class UserController extends Controller
             'role_id'  => 1, // ADMIN
         ]);
 
-        return redirect()->route('users.index')
+       return redirect()->route('users.index')
             ->with('success', 'Administrador criado com sucesso.');
     }
 
 
+    /* ============================================================
+     |     ROTAS QUE FALTAVAM (edit, update, destroy)
+     ============================================================ */
+
+    /**
+     * Formulário de edição de utilizador.
+     */
+    public function edit(User $user)
+    {
+        $roles = \App\Models\Role::all();
+        return view('admin.users.edit', compact('user', 'roles'));
+    }
+
+    /**
+     * Atualiza um utilizador.
+     */
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name'  => 'required',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role_id' => 'required|exists:roles,id',
+        ]);
+
+        $user->update([
+            'name'  => $request->name,
+            'email' => $request->email,
+            'role_id' => $request->role_id,
+        ]);
+
+        return redirect()->route('users.index')
+            ->with('success', 'Utilizador atualizado com sucesso.');
+    }
+
+    /**
+     * Apaga um utilizador.
+     */
+    public function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()->route('users.index')
+            ->with('success', 'Utilizador eliminado com sucesso.');
+    }
+
 
     /* ============================================================
-     |              MÓDULO DE REQUISIÇÕES (CIDADÃO)
+     |           MÓDULO DE REQUISIÇÕES (CIDADÃO)
      ============================================================ */
 
     /**
@@ -70,11 +115,15 @@ class UserController extends Controller
      */
     public function requisitarForm(Livro $livro)
     {
-        if (! $livro->isDisponivel()) {
-            return back()->with('error', 'Este livro está atualmente requisitado.');
-        }
+        if (auth()->user()->isAdmin()) {
+        return back()->with('error', 'Administradores não podem fazer requisições.');
+                }
 
-        return view('users.requisitar', compact('livro'));
+                if (!$livro->isDisponivel()) {
+                    return back()->with('error', 'Este livro está atualmente requisitado.');
+                }
+
+    return view('users.requisitar', compact('livro'));
     }
 
     /**
@@ -82,6 +131,9 @@ class UserController extends Controller
      */
     public function requisitar(Request $request, Livro $livro)
     {
+
+
+
         $request->validate([
             'data_prevista_entrega' => 'required|date|after:today',
             'foto_cidadao' => 'nullable|image|max:2048',

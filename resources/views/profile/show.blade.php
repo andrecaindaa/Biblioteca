@@ -25,9 +25,9 @@
         <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1">
                 <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ route('livros.index') }}">Livros</a></li>
-                <li><a href="{{ route('autores.index') }}">Autores</a></li>
-                <li><a href="{{ route('editoras.index') }}">Editoras</a></li>
+                <li><a href="{{ route('admin.livros.index') }}">Livros</a></li>
+                <li><a href="{{ route('admin.autores.index') }}">Autores</a></li>
+                <li><a href="{{ route('admin.editoras.index') }}">Editoras</a></li>
             </ul>
         </div>
         <div class="navbar-end">
@@ -199,25 +199,25 @@
                     <h3 class="card-title text-2xl mb-6">Ações Rápidas</h3>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <a href="{{ route('livros.create') }}" class="btn btn-outline btn-primary justify-start">
+                        <a href="{{ route('admin.livros.create') }}" class="btn btn-outline btn-primary justify-start">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                             Adicionar Livro
                         </a>
-                        <a href="{{ route('autores.create') }}" class="btn btn-outline btn-secondary justify-start">
+                        <a href="{{ route('admin.autores.create') }}" class="btn btn-outline btn-secondary justify-start">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                             Adicionar Autor
                         </a>
-                        <a href="{{ route('editoras.create') }}" class="btn btn-outline btn-accent justify-start">
+                        <a href="{{ route('admin.editoras.create') }}" class="btn btn-outline btn-accent justify-start">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
                             Adicionar Editora
                         </a>
-                        <a href="{{ route('livros.index') }}" class="btn btn-outline btn-info justify-start">
+                        <a href="{{ route('admin.livros.index') }}" class="btn btn-outline btn-info justify-start">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>

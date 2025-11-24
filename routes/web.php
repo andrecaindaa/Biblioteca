@@ -1,9 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
+use App\Models\User;
+
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\LivroController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RequisicaoController;
 
@@ -13,15 +16,24 @@ use App\Livewire\Autores;
 use App\Livewire\AutorForm;
 use App\Livewire\Editoras;
 use App\Livewire\EditoraForm;
+use App\Livewire\Catalogo;
+use App\Livewire\CatalogoShow;
 
-
-
-// Rota inicial
+/*
+|--------------------------------------------------------------------------
+| ROTA RAIZ
+|--------------------------------------------------------------------------
+*/
 Route::get('/', fn() => redirect()->route('dashboard'));
 
-// Verificação de email
+/*
+|--------------------------------------------------------------------------
+| VERIFICAÇÃO DE EMAIL
+|--------------------------------------------------------------------------
+*/
 Route::get('/email/verify', fn() => view('auth.verify-email'))
-    ->middleware('auth')->name('verification.notice');
+    ->middleware('auth')
+    ->name('verification.notice');
 
 Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\EmailVerificationRequest $request) {
     $request->fulfill();
@@ -31,99 +43,156 @@ Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\Em
 Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Link de verificação enviado!');
-})->middleware(['auth','throttle:6,1'])->name('verification.send');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
-
-// ÁREA AUTENTICADA
+/*
+|--------------------------------------------------------------------------
+| ÁREA AUTENTICADA
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-
-    // Catálogo público
-Route::get('/catalogo', \App\Livewire\Catalogo::class)->name('catalogo.index');
-Route::get('/catalogo/{livro}', \App\Livewire\CatalogoShow::class)->name('catalogo.show');
-
-      // Gestão de requisições (Admin)
-        Route::post('/requisicoes/{requisicao}/entregar', [RequisicaoController::class,'marcarEntregue'])
-            ->name('requisicoes.entregar');
-
 
     // Dashboard
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    // Teste email
-    Route::get('/test-email', function () {
-        Mail::raw('Teste email Laravel', fn($message) => $message->to('andretchipalavela@gmail.com')
-            ->subject('📚 Teste de Email - Biblioteca'));
-        return 'Email enviado!';
-    });
-
     // Perfil
     Route::view('/user/profile', 'profile.show')->name('profile.show');
 
-    // 2FA
-    // Rotas do 2FA - CORRIGIDAS
-    Route::post('/user/two-factor-authentication', function (\Illuminate\Http\Request $request) {
-        $user = $request->user();
+    // Catálogo público
+    Route::get('/catalogo', Catalogo::class)->name('catalogo.index');
+    Route::get('/catalogo/{livro}', CatalogoShow::class)->name('catalogo.show');
 
-        if (!$user->two_factor_secret) {
-            $user->forceFill([
-                'two_factor_secret' => encrypt('2fa-secret-' . time()),
-                'two_factor_recovery_codes' => encrypt(json_encode([
-                    'recovery-code-1',
-                    'recovery-code-2',
-                    'recovery-code-3'
-                ])),
-            ])->save();
-
-            session()->flash('message', '2FA ativado com sucesso!');
-            session()->flash('alert-type', 'success');
-        }
-
-        return redirect()->route('profile.show');
-    })->name('two-factor.enable');
-
-    Route::delete('/user/two-factor-authentication', function (\Illuminate\Http\Request $request) {
-        $user = $request->user();
-
-        $user->forceFill([
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
-        ])->save();
-
-        session()->flash('message', '2FA desativado com sucesso!');
-        session()->flash('alert-type', 'success');
-
-        return redirect()->route('profile.show');
-    })->name('two-factor.disable');
-
-    // REQUISIÇÕES (Cidadãos + Admin)
-    Route::post('/livros/{livro}/requisitar', [RequisicaoController::class, 'store'])->name('requisicoes.store');
-
-    Route::post('/requisicoes/{requisicao}/entregar', [RequisicaoController::class, 'marcarEntregue'])
-        ->middleware('can:admin')
-        ->name('requisicoes.entregar');
-
-    // USERS (Admin)
-    Route::middleware('admin')->group(function () {
-        Route::resource('users', UserController::class);
-        Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-
-        // LIVROS (CRUD)
-        Route::resource('livros', LivroController::class)->except(['index','show']);
+    // Teste de email
+    Route::get('/test-email', function () {
+        Mail::raw('Teste email Laravel', fn($msg) =>
+            $msg->to('admin@biblioteca.test')->subject('📚 Teste de Email - Biblioteca')
+        );
+        return 'Email enviado!';
     });
 
-    // REQUISIÇÕES (listar, detalhes)
-    Route::resource('requisicoes', RequisicaoController::class)->only(['index','show']);
+    /*
+    |--------------------------------------------------------------------------
+    | REQUISIÇÕES (Cidadão + Admin)
+    |--------------------------------------------------------------------------
+    */
+    /*Route::get('/livros/{livro}/requisitar', [RequisicaoController::class, 'create'])
+        ->name('users.requisitar.form');
 
-    // LIVEWIRE
-    Route::get('/autores', Autores::class)->name('autores.index');
-    Route::get('/autores/create', AutorForm::class)->name('autores.create');
-    Route::get('/autores/{autor}/edit', AutorForm::class)->name('autores.edit');
+    Route::post('/livros/{livro}/requisitar', [RequisicaoController::class, 'store'])
+        ->name('users.requisitar.store');*/
 
-    Route::get('/editoras', Editoras::class)->name('editoras.index');
-    Route::get('/editoras/create', EditoraForm::class)->name('editoras.create');
-    Route::get('/editoras/{editora}/edit', EditoraForm::class)->name('editoras.edit');
+        Route::get('/livros/{livro}/requisitar', [UserController::class, 'requisitarForm'])
+    ->name('users.requisitar.form');
 
-    Route::get('/livros', Livros::class)->name('livros.index');
-    Route::get('/livros/create', LivroForm::class)->name('livros.create');
-    Route::get('/livros/{livro}/edit', LivroForm::class)->name('livros.edit');
+Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
+    ->name('users.requisitar.store');
+
+    Route::get('/requisicoes/{requisicao}/confirmar', [RequisicaoController::class, 'confirmar'])
+        ->name('requisicoes.confirmar');
+
+    Route::post('/requisicoes/{requisicao}/confirmar', [RequisicaoController::class, 'confirmarStore'])
+        ->name('requisicoes.confirmar.store');
+
+    Route::post('/requisicoes/{requisicao}/entregar', [RequisicaoController::class, 'marcarEntregue'])
+        ->name('requisicoes.entregar');
+
+    Route::resource('requisicoes', RequisicaoController::class)
+        ->only(['index', 'show']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | ÁREA ADMINISTRATIVA (Livewire sem middleware)
+    |--------------------------------------------------------------------------
+    */
+
+    // Dashboard Admin
+    Route::get('/admin/dashboard', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+
+    // Gestão de usuários -
+    Route::prefix('admin')->group(function () {
+
+        Route::get('/users', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->index();
+        })->name('users.index');
+
+        Route::get('/users/create', function () {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->create();
+        })->name('users.create');
+
+        Route::post('/users', function (Request $request) {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->store($request);
+        })->name('users.store');
+
+        Route::get('/users/{user}', function (User $user) {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->show($user);
+        })->name('users.show');
+
+        Route::get('/users/{user}/edit', function (User $user) {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->edit($user);
+        })->name('users.edit');
+
+        Route::put('/users/{user}', function (Request $request, User $user) {
+            if (!auth()->user()->isAdmin()) abort(403);
+            return (new UserController)->update($request, $user);
+        })->name('users.update');
+
+        Route::delete('/users/{user}', function (User $user) {
+        })->name('users.destroy');
+    });
+
+    // Livros
+    Route::get('/admin/livros', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(Livros::class);
+    })->name('admin.livros.index');
+
+    Route::get('/admin/livros/create', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(LivroForm::class);
+    })->name('admin.livros.create');
+
+    Route::get('/admin/livros/{livro}/edit', function ($livro) {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(LivroForm::class, ['livro' => $livro]);
+    })->name('admin.livros.edit');
+
+    // Autores
+    Route::get('/admin/autores', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(Autores::class);
+    })->name('admin.autores.index');
+
+    Route::get('/admin/autores/create', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(AutorForm::class);
+    })->name('admin.autores.create');
+
+    Route::get('/admin/autores/{autor}/edit', function ($autor) {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(AutorForm::class, ['autor' => $autor]);
+    })->name('admin.autores.edit');
+
+    // Editoras
+    Route::get('/admin/editoras', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(Editoras::class);
+    })->name('admin.editoras.index');
+
+    Route::get('/admin/editoras/create', function () {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(EditoraForm::class);
+    })->name('admin.editoras.create');
+
+    Route::get('/admin/editoras/{editora}/edit', function ($editora) {
+        if (!auth()->user()->isAdmin()) abort(403);
+        return app()->call(EditoraForm::class, ['editora' => $editora]);
+    })->name('admin.editoras.edit');
 });

@@ -66,11 +66,10 @@
                         </p>
                         <div class="mt-auto d-flex justify-content-between">
                             <a href="{{ route('catalogo.show',$livro->id) }}" class="btn btn-outline-primary btn-sm">Ver</a>
-                            @if($livro->isDisponivel())
-                                <form action="{{ route('requisicoes.store',$livro->id) }}" method="POST">
-                                    @csrf
-                                    <button class="btn btn-success btn-sm">Requisitar</button>
-                                </form>
+                            @if($livro->isDisponivel() && auth()->check() && !auth()->user()->isAdmin()!== true)
+                                <a href="{{ route('users.requisitar.form', $livro->id) }}" class="btn btn-success btn-sm">
+                                    Requisitar
+                                </a>
                             @endif
                         </div>
                     </div>

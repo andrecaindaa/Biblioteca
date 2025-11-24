@@ -64,9 +64,13 @@
                     <a href="{{ route('requisicoes.show', $r->id) }}" class="btn btn-info btn-sm">Ver</a>
 
                     @if(auth()->user()->isAdmin() && $r->status === 'ativo')
-                    <a href="{{ route('requisicoes.confirmar', $r->id) }}" class="btn btn-warning btn-sm">
-                        Confirmar Entrega
-                    </a>
+                    <form action="{{ route('requisicoes.entregar', $r->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button class="btn btn-warning btn-sm">
+                            Confirmar Entrega
+                        </button>
+                    </form>
+
                     @endif
                 </td>
             </tr>

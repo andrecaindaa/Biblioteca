@@ -2,7 +2,7 @@
     <!-- Cabeçalho -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 class="text-3xl font-bold">Gestão de Autores</h1>
-        <a href="{{ route('autores.create') }}" class="btn btn-primary">
+        <a href="{{ route('admin.autores.create') }}" class="btn btn-primary">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -76,7 +76,7 @@
                         </td>
                         <td>
                             <div class="flex gap-2 justify-end">
-                                <a href="{{ route('autores.edit', $autor->id) }}"
+                                <a href="{{ route('admin.autores.edit', $autor->id) }}"
                                    class="btn btn-sm btn-info">
                                     Editar
                                 </a>

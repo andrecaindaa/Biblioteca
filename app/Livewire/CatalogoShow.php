@@ -45,6 +45,11 @@ class CatalogoShow extends Component
             return;
         }
 
+        if ($user->isAdmin()) {
+    session()->flash('error', 'Administradores não podem fazer requisições.');
+    return;
+}
+
         // limite 3
         $count = Requisicao::where('user_id', $user->id)
             ->where('status', 'ativo')

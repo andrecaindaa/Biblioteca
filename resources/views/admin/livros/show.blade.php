@@ -20,6 +20,6 @@
         <a href="{{ route('users.requisitar.form', $livro->id) }}" class="btn btn-success">Requisitar</a>
     @endif
 
-    <a href="{{ route('livros.index') }}" class="btn btn-secondary">Voltar</a>
+    <a href="{{ route('admin.livros.index') }}" class="btn btn-secondary">Voltar</a>
 </div>
 @endsection

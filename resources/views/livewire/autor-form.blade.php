@@ -64,7 +64,7 @@
                 <!-- Botões -->
                 <div class="form-control mt-6">
                     <div class="flex gap-3 justify-end">
-                        <a href="{{ route('autores.index') }}" class="btn btn-ghost">
+                        <a href="{{ route('admin.autores.index') }}" class="btn btn-ghost">
                             Cancelar
                         </a>
                         <button type="submit" class="btn btn-primary">

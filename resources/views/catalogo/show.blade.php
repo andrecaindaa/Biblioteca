@@ -31,13 +31,10 @@
             </p>
 
             {{-- Botão Requisitar --}}
-            @if($livro->isDisponivel())
-                <form action="{{ route('requisicoes.store', $livro->id) }}" method="POST" class="mt-3">
-                    @csrf
-                    <button class="btn btn-success">
-                        Requisitar Livro
-                    </button>
-                </form>
+            @if($livro->isDisponivel() && auth()->check() && !auth()->user()->isAdmin())
+                <a href="{{ route('users.requisitar.form', $livro->id) }}" class="btn btn-success">
+                    Requisitar Livro
+                </a>
             @endif
 
         </div>

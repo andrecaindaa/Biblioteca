@@ -10,7 +10,7 @@
                 </svg>
                 Exportar Excel
             </button>
-            <a href="{{ route('livros.create') }}" class="btn btn-primary">
+            <a href="{{ route('admin.livros.create') }}" class="btn btn-primary">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -89,7 +89,7 @@
                         <td class="font-mono">{{ number_format($livro->preco, 2, ',', '.') }} €</td>
                         <td>
                             <div class="flex gap-2 justify-end">
-                                <a href="{{ route('livros.edit', $livro->id) }}" class="btn btn-sm btn-info">
+                                <a href="{{ route('admin.livros.edit', $livro->id) }}" class="btn btn-sm btn-info">
                                     Editar
                                 </a>
                                 <button

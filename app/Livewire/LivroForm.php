@@ -64,7 +64,7 @@ class LivroForm extends Component
                 $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn,' . $livroModel->id;
             } else {
                 session()->flash('error', 'Livro não encontrado.');
-                return $this->redirectRoute('livros.index', navigate: true);
+                return $this->redirectRoute('admin.livros.index', navigate: true);
             }
         } else {
             $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn';
@@ -101,7 +101,7 @@ class LivroForm extends Component
         $livro->autores()->sync($this->autoresSelecionados);
 
         session()->flash('message', $this->isEditing ? 'Livro atualizado com sucesso!' : 'Livro criado com sucesso!');
-        return $this->redirectRoute('livros.index', navigate: true);
+        return $this->redirectRoute('admin.livros.index', navigate: true);
     }
 
     public function render()

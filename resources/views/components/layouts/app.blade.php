@@ -23,9 +23,9 @@
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box mt-3 w-52 p-2 shadow">
                     <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                    <li><a href="{{ route('livros.index') }}">Livros</a></li>
-                    <li><a href="{{ route('autores.index') }}">Autores</a></li>
-                    <li><a href="{{ route('editoras.index') }}">Editoras</a></li>
+                    <li><a href="{{ route('admin.livros.index') }}">Livros</a></li>
+                    <li><a href="{{ route('admin.autores.index') }}">Autores</a></li>
+                    <li><a href="{{ route('admin.editoras.index') }}">Editoras</a></li>
                 </ul>
             </div>
             <a href="{{ route('dashboard') }}" class="btn btn-ghost text-xl">Biblioteca</a>
@@ -34,9 +34,9 @@
         <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1">
                 <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                <li><a href="{{ route('livros.index') }}">Livros</a></li>
-                <li><a href="{{ route('autores.index') }}">Autores</a></li>
-                <li><a href="{{ route('editoras.index') }}">Editoras</a></li>
+                <li><a href="{{ route('admin.livros.index') }}">Livros</a></li>
+                <li><a href="{{ route('admin.autores.index') }}">Autores</a></li>
+                <li><a href="{{ route('admin.editoras.index') }}">Editoras</a></li>
             </ul>
         </div>
 

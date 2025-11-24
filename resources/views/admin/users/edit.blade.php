@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Editar Utilizador: {{ $user->name }}</h1>
 
-    <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+    <form action="{{ route('users.update', $user->id) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -26,14 +26,14 @@
                 @foreach($roles as $role)
                     <option value="{{ $role->id }}"
                         {{ $user->role_id == $role->id ? 'selected' : '' }}>
-                        {{ $role->name }}
+                        {{ $role->nome }}
                     </option>
                 @endforeach
             </select>
         </div>
 
         <button class="btn btn-primary">Guardar Alterações</button>
-        <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancelar</a>
+        <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancelar</a>
     </form>
 
 </div>

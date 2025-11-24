@@ -2,7 +2,18 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4">Gestão de Utilizadores</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestão de Utilizadores</h1>
+        <a href="{{ route('users.create') }}" class="btn btn-primary">
+            + Novo Utilizador
+        </a>
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
     <table class="table table-bordered table-striped">
         <thead>
@@ -18,11 +29,12 @@
             <tr>
                 <td>{{ $u->name }}</td>
                 <td>{{ $u->email }}</td>
-                <td>{{ $u->role->name ?? 'Cidadão' }}</td>
+                <td>{{ $u->role->nome ?? 'Cidadão' }}</td>
                 <td>
-                    <a href="{{ route('admin.users.edit', $u->id) }}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{{ route('users.show', $u->id) }}" class="btn btn-sm btn-info">Ver</a>
+                    <a href="{{ route('users.edit', $u->id) }}" class="btn btn-sm btn-primary">Editar</a>
 
-                    <form action="{{ route('admin.users.destroy', $u->id) }}"
+                    <form action="{{ route('users.destroy', $u->id) }}"
                           method="POST"
                           class="d-inline">
                         @csrf

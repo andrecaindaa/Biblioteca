@@ -42,7 +42,7 @@ class EditoraForm extends Component
                 $this->isEditing = true;
             } else {
                 session()->flash('error', 'Editora não encontrada.');
-                return $this->redirectRoute('editoras.index', navigate: true);
+                return $this->redirectRoute('admin.editoras.index', navigate: true);
             }
         }
     }
@@ -70,7 +70,7 @@ class EditoraForm extends Component
         $editora->save();
 
         session()->flash('message', $this->isEditing ? 'Editora atualizada com sucesso!' : 'Editora criada com sucesso!');
-        return $this->redirectRoute('editoras.index', navigate: true);
+        return $this->redirectRoute('admin.editoras.index', navigate: true);
     }
 
     public function render()

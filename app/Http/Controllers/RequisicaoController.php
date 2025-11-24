@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\NovaRequisicaoMail;
 use App\Mail\ConfirmacaoEntregaMail;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RequisicaoController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Criar nova requisição
      */

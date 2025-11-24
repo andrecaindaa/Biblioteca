@@ -97,7 +97,10 @@ Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
         ->name('requisicoes.entregar');
 
     Route::resource('requisicoes', RequisicaoController::class)
-        ->only(['index', 'show']);
+    ->only(['index', 'show'])
+    ->parameters([
+        'requisicoes' => 'requisicao'
+    ]);
 
     /*
     |--------------------------------------------------------------------------
@@ -145,7 +148,9 @@ Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
         })->name('users.update');
 
         Route::delete('/users/{user}', function (User $user) {
-        })->name('users.destroy');
+    if (!auth()->user()->isAdmin()) abort(403);
+    return (new UserController)->destroy($user);
+})->name('users.destroy');
     });
 
     // Livros

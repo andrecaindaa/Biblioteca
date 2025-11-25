@@ -85,7 +85,7 @@ class RequisicaoController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if ($user->isAdmin()) {
             $requisicoes = Requisicao::with(['livro','user'])->latest()->get();

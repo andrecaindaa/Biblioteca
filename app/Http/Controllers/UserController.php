@@ -115,7 +115,7 @@ class UserController extends Controller
      */
     public function requisitarForm(Livro $livro)
     {
-        if (auth()->user()->isAdmin()) {
+        if (Auth::user()->isAdmin()) {
         return back()->with('error', 'Administradores não podem fazer requisições.');
                 }
 

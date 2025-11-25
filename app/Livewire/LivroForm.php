@@ -27,8 +27,10 @@ class LivroForm extends Component
     public $preco;
     public $isEditing = false;
 
-    protected $rules = [
-        'isbn' => 'required|string|max:20',
+    protected function rules()
+{
+    return [
+        'isbn' => 'required|string|max:20|unique:livros,isbn' . ($this->livroId ? ',' . $this->livroId : ''),
         'nome' => 'required|string|max:255',
         'editora_id' => 'required|exists:editoras,id',
         'autoresSelecionados' => 'required|array|min:1',
@@ -36,44 +38,47 @@ class LivroForm extends Component
         'imagem_capa' => 'nullable|image|max:2048',
         'preco' => 'required|numeric|min:0',
     ];
+}
+
+protected $messages = [
+    'isbn.unique' => 'Este ISBN já existe no sistema.',
+];
+
+
 
     public function mount($livro = null)
-    {
-        // VERIFICAÇÃO DE ADMIN
-        if (!Auth::check() || !Auth::user()->isAdmin()) {
-            abort(403, 'Acesso reservado a administradores.');
-        }
+{
+    // VERIFICAÇÃO DE ADMIN
+    if (!Auth::check() || !Auth::user()->isAdmin()) {
+        abort(403, 'Acesso reservado a administradores.');
+    }
 
-        // ... resto do código original
-        if ($livro) {
-            if (is_numeric($livro)) {
-                $livroModel = Livro::with('autores')->find($livro);
-            } else {
-                $livroModel = $livro;
-            }
+    if ($livro) {
+        $livroModel = is_numeric($livro)
+            ? Livro::with('autores')->find($livro)
+            : $livro;
 
-            if ($livroModel) {
-                $this->livroId = $livroModel->id;
-                $this->isbn = $livroModel->isbn;
-                $this->nome = $livroModel->nome;
-                $this->editora_id = $livroModel->editora_id;
-                $this->bibliografia = $livroModel->bibliografia;
-                $this->preco = $livroModel->preco;
-                $this->autoresSelecionados = $livroModel->autores->pluck('id')->toArray();
-                $this->isEditing = true;
-                $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn,' . $livroModel->id;
-            } else {
-                session()->flash('error', 'Livro não encontrado.');
-                return $this->redirectRoute('admin.livros.index', navigate: true);
-            }
+        if ($livroModel) {
+            $this->livroId = $livroModel->id;
+            $this->isbn = $livroModel->isbn;
+            $this->nome = $livroModel->nome;
+            $this->editora_id = $livroModel->editora_id;
+            $this->bibliografia = $livroModel->bibliografia;
+            $this->preco = $livroModel->preco;
+            $this->autoresSelecionados = $livroModel->autores->pluck('id')->toArray();
+            $this->isEditing = true;
         } else {
-            $this->rules['isbn'] = 'required|string|max:20|unique:livros,isbn';
+            session()->flash('error', 'Livro não encontrado.');
+            return $this->redirectRoute('admin.livros.index', navigate: true);
         }
     }
+}
+
 
     public function save()
     {
         $this->validate();
+
 
         if ($this->isEditing) {
             $livro = Livro::findOrFail($this->livroId);

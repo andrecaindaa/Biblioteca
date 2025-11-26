@@ -19,6 +19,41 @@ class Livro extends Model
         'preco' => 'decimal:2',
     ];
 
+    /**
+     * Mutator para garantir que o preço seja sempre um decimal válido
+     */
+    public function setPrecoAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            $this->attributes['preco'] = 0.00;
+            return;
+        }
+
+        // Se for string, limpa e converte
+        if (is_string($value)) {
+            $cleanedValue = preg_replace('/[^\d,\.]/', '', $value);
+            $cleanedValue = str_replace(',', '.', $cleanedValue);
+            $value = floatval($cleanedValue);
+        }
+
+        $floatValue = max(0, floatval($value));
+        $this->attributes['preco'] = round($floatValue, 2);
+    }
+
+    /**
+     * Accessor para garantir que sempre retornamos um float
+     */
+    public function getPrecoAttribute($value)
+    {
+        if (is_string($value)) {
+            $cleanedValue = preg_replace('/[^\d,\.]/', '', $value);
+            $cleanedValue = str_replace(',', '.', $cleanedValue);
+            return floatval($cleanedValue);
+        }
+
+        return $value ?? 0.00;
+    }
+
     // cifrar bibliografia no banco
     public function setBibliografiaAttribute($value)
     {
@@ -56,9 +91,7 @@ class Livro extends Model
     }
 
     public function getCapaAttribute()
-{
-
-    return $this->attributes['imagem_capa'] ?? null;
-}
-
+    {
+        return $this->attributes['imagem_capa'] ?? null;
+    }
 }

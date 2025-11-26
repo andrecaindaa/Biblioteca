@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RequisicaoController;
+use App\Http\Controllers\GoogleBooksController;
 
 use App\Livewire\Livros;
 use App\Livewire\LivroForm;
@@ -114,6 +115,26 @@ Route::get('/admin/dashboard', function () {
     if (!Auth::user()->isAdmin()) abort(403);
     return view('admin.dashboard');
 })->name('admin.dashboard');
+
+//BookStoreAPI
+// Google Books - Apenas Admin
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/googlebooks/search', function () {
+        if (!Auth::user()->isAdmin()) abort(403);
+
+        return app()->call([app(\App\Http\Controllers\GoogleBooksController::class), 'search']);
+    })->name('googlebooks.search');
+
+    Route::post('/googlebooks/import', function (\Illuminate\Http\Request $request) {
+        if (!Auth::user()->isAdmin()) abort(403);
+
+        return app()->call([app(\App\Http\Controllers\GoogleBooksController::class), 'import'], ['request' => $request]);
+    })->name('googlebooks.import');
+
+});
+
+
 
 // Gestão de usuários
 Route::prefix('admin')->group(function () {

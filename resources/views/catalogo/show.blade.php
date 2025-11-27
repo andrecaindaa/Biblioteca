@@ -6,11 +6,14 @@
     <h1>{{ $livro->nome }}</h1>
 
     <div class="row mt-4">
+
         <div class="col-md-4">
             @if($livro->capa)
-                <img src="{{ asset('storage/' . $livro->capa) }}" class="img-fluid rounded shadow" alt="Capa do livro {{ $livro->nome }}">
+                <img src="{{ asset('storage/'.$livro->capa) }}"
+                     class="book-cover-large shadow"
+                     alt="Capa do livro {{ $livro->nome }}">
             @else
-                <div class="bg-light border rounded d-flex align-items-center justify-content-center" style="height: 300px;">
+                <div class="book-cover-large bg-light border rounded d-flex justify-content-center align-items-center">
                     <span class="text-muted">Sem capa disponível</span>
                 </div>
             @endif
@@ -19,8 +22,7 @@
         <div class="col-md-8">
 
             <p><strong>Autor(es):</strong> {{ $livro->autores->pluck('nome')->join(', ') }}</p>
-
-            <p><strong>Editora:</strong> {{ $livro->editora->nome ?? '—' }}</p>
+            <p><strong>Editora:</strong> {{ $livro->editora->nome }}</p>
 
             <p><strong>Status:</strong>
                 @if($livro->isDisponivel())
@@ -30,9 +32,8 @@
                 @endif
             </p>
 
-            {{-- Botão Requisitar --}}
             @if($livro->isDisponivel() && auth()->check() && !auth()->user()->isAdmin())
-                <a href="{{ route('users.requisitar.form', $livro->id) }}" class="btn btn-success">
+                <a href="{{ route('users.requisitar.form', $livro->id) }}" class="btn btn-success mt-2">
                     Requisitar Livro
                 </a>
             @endif
@@ -70,4 +71,14 @@
     @endif
 
 </div>
+
+<style>
+.book-cover-large {
+    width: 100%;
+    aspect-ratio: 2 / 3;      /* Mesmo tamanho que catálogo */
+    object-fit: cover;
+    border-radius: 8px;
+}
+</style>
+
 @endsection

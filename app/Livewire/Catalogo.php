@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Livro;
+use App\Models\Autor;
+use App\Models\Editora;
 
 class Catalogo extends Component
 {
@@ -17,7 +19,10 @@ class Catalogo extends Component
     public $filterEditora = null;
     public $filterAutor = null;
 
-    protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora', 'filterAutor', 'perPage'];
+    protected $queryString = [
+        'search', 'sortField', 'sortDirection',
+        'filterEditora', 'filterAutor', 'perPage'
+    ];
 
     public function updatingSearch()
     {
@@ -45,9 +50,9 @@ class Catalogo extends Component
         $query = Livro::with(['editora', 'autores']);
 
         if ($this->search) {
-            $query->where(function($q){
-                $q->where('nome', 'like', '%'.$this->search.'%')
-                  ->orWhere('isbn', 'like', '%'.$this->search.'%');
+            $query->where(function($q) {
+                $q->where('nome', 'like', '%' . $this->search . '%')
+                  ->orWhere('isbn', 'like', '%' . $this->search . '%');
             });
         }
 
@@ -56,7 +61,7 @@ class Catalogo extends Component
         }
 
         if ($this->filterAutor) {
-            $query->whereHas('autores', function($q){
+            $query->whereHas('autores', function($q) {
                 $q->where('autores.id', $this->filterAutor);
             });
         }
@@ -65,14 +70,14 @@ class Catalogo extends Component
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
 
-        // Carregar dados auxiliares para filtros
-        $editoras = \App\Models\Editora::orderBy('nome')->get();
-        $autores = \App\Models\Autor::orderBy('nome')->get();
+        // NOVO — detectar Admin e passar para a view
+        $isAdmin = auth()->check() && auth()->user()->isAdmin();
 
         return view('livewire.catalogo', [
             'livros' => $livros,
-            'editoras' => $editoras,
-            'autores' => $autores,
+            'editoras' => Editora::orderBy('nome')->get(),
+            'autores'  => Autor::orderBy('nome')->get(),
+            'isAdmin' => $isAdmin,
         ]);
     }
 }

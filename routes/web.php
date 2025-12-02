@@ -21,6 +21,9 @@ use App\Livewire\EditoraForm;
 use App\Livewire\Catalogo;
 use App\Livewire\CatalogoShow;
 
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+
 /*
 |--------------------------------------------------------------------------
 | ROTA RAIZ
@@ -131,6 +134,42 @@ Route::middleware(['auth'])->group(function () {
 
         return app()->call([app(\App\Http\Controllers\GoogleBooksController::class), 'import'], ['request' => $request]);
     })->name('googlebooks.import');
+
+
+    // Cidadão cria review (apenas após entrega)
+Route::get('/requisicoes/{requisicao}/review/create', [ReviewController::class, 'create'])
+    ->name('reviews.create');
+
+Route::post('/requisicoes/{requisicao}/review', [ReviewController::class, 'store'])
+    ->name('reviews.store');
+});
+    /*
+|--------------------------------------------------------------------------
+| REVIEWS — Admin (moderação)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->group(function () {
+
+    Route::get('/reviews', function () {
+        if (!Auth::user()->isAdmin()) abort(403);
+        return app()->call([AdminReviewController::class, 'index']);
+    })->name('admin.reviews.index');
+
+    Route::get('/reviews/{review}', function ($review) {
+        if (!Auth::user()->isAdmin()) abort(403);
+        return app()->call([AdminReviewController::class, 'show'], ['review' => $review]);
+    })->name('admin.reviews.show');
+
+    Route::post('/reviews/{review}/approve', function ($review) {
+        if (!Auth::user()->isAdmin()) abort(403);
+        return app()->call([AdminReviewController::class, 'approve'], ['review' => $review]);
+    })->name('admin.reviews.approve');
+
+    Route::post('/reviews/{review}/reject', function (Request $request, $review) {
+        if (!Auth::user()->isAdmin()) abort(403);
+        return app()->call([AdminReviewController::class, 'reject'], ['review' => $review, 'request' => $request]);
+    })->name('admin.reviews.reject');
 
 });
 

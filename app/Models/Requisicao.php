@@ -60,4 +60,10 @@ class Requisicao extends Model
 
         return 'REC-' . str_pad($novo, 4, '0', STR_PAD_LEFT);
     }
+
+    public function review()
+{
+    return $this->hasOne(\App\Models\Review::class, 'requisicao_id');
+}
+
 }

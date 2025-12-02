@@ -107,6 +107,40 @@
                 @endif
             </div>
 
+            <div class="mt-10">
+    <h4 class="font-semibold mb-3">Avaliações dos Leitores</h4>
+
+    @php
+        $reviewsAtivos = \App\Models\Review::where('livro_id', $livro->id)
+            ->where('status', 'ativo')
+            ->with('user')
+            ->latest()
+            ->get();
+    @endphp
+
+    @if($reviewsAtivos->isEmpty())
+        <p>Ainda não existem reviews para este livro.</p>
+    @else
+        @foreach($reviewsAtivos as $review)
+            <div class="card bg-base-200 p-4 mb-3">
+                <div class="flex items-center justify-between">
+                    <span class="font-semibold">{{ $review->user->name }}</span>
+                    <span class="text-sm opacity-70">{{ $review->created_at->format('d/m/Y') }}</span>
+                </div>
+
+                @if($review->rating)
+                    <div class="mt-2 text-warning">
+                        ⭐ {{ $review->rating }}/5
+                    </div>
+                @endif
+
+                <p class="mt-2">{{ $review->comentario }}</p>
+            </div>
+        @endforeach
+    @endif
+</div>
+
+
         </div>
     </div>
 </div>

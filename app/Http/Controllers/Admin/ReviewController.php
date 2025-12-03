@@ -14,7 +14,11 @@ class ReviewController extends Controller
 
     public function index()
     {
-        $reviews = Review::with(['livro', 'user', 'requisicao'])->orderByDesc('created_at')->paginate(20);
+        $reviews = Review::where('status', 'suspenso')
+    ->with(['livro', 'user'])
+    ->orderByDesc('created_at')
+    ->paginate(20);
+
         return view('admin.reviews.index', compact('reviews'));
     }
 
@@ -48,6 +52,8 @@ class ReviewController extends Controller
         // notificar autor
         Mail::to($review->user->email)->queue(new ReviewStatusChanged($review));
 
-        return redirect()->route('admin.reviews.index')->with('success', 'Review recusada e autor notificado.');
+       return redirect()->route('admin.reviews.show', $review->id)
+    ->with('success', 'Review recusada e autor notificado.');
+
     }
 }

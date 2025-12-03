@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-
+use App\Services\RelatedBooksService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Livro;
@@ -25,8 +25,13 @@ class CatalogoShow extends Component
     public $confirmMessage = null;
 
     public $livroId;
+    protected RelatedBooksService $relatedService;
 
-
+    public function boot(RelatedBooksService $relatedService)
+    {
+        // Livewire chama boot() automaticamente após injeção
+        $this->relatedService = $relatedService;
+    }
     protected $rules = [
         'foto_cidadao' => 'nullable|image|max:2048',
     ];
@@ -99,16 +104,36 @@ class CatalogoShow extends Component
 }
     }
 
-    public function render()
-    {
-        // carregar histórico (últimas 10)
+   public function render()
+{
+
+     // carregar histórico (últimas 10)
         $historico = $this->livro->requisicoes()->with('user')->latest()->limit(10)->get();
 
+        // obter relacionados (top 5)
+        $related = $this->relatedService->getRelated($this->livro, 5);
 
+    // carregar histórico (últimas 10)
+    $historico = $this->livro->requisicoes()
+        ->with('user')
+        ->latest()
+        ->limit(10)
+        ->get();
 
-        return view('livewire.catalogo-show', [
-            'livro' => $this->livro,
-            'historico' => $historico,
-        ]);
-    }
+    // carregar reviews ativas
+            $reviews = Review::where('livro_id', $this->livro->id)
+                ->where('status', 'ativo')
+                ->with('user')
+                ->latest()
+                ->get();
+
+            return view('livewire.catalogo-show', [
+                'livro' => $this->livro,
+                'historico' => $historico,
+                'reviews' => \App\Models\Review::where('livro_id', $this->livro->id)
+                            ->where('status','ativo')->with('user')->latest()->get(),
+            'relatedBooks' => $related,
+    ]);
+}
+
 }

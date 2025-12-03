@@ -141,6 +141,33 @@
 </div>
 
 
+
+<div class="mt-10">
+    <h4 class="font-semibold mb-3">Livros relacionados</h4>
+
+    @if($relatedBooks->isEmpty())
+        <p class="text-sm text-muted">Sem sugestões por enquanto.</p>
+    @else
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @foreach($relatedBooks as $r)
+                <div class="card p-3">
+                    @if($r->imagem_capa)
+                        <img src="{{ asset('storage/'.$r->imagem_capa) }}" alt="{{ $r->nome }}" class="w-full h-40 object-cover rounded mb-2" />
+                    @endif
+                    <h5 class="font-semibold text-sm">{{ Str::limit($r->nome, 60) }}</h5>
+                    <p class="text-xs text-muted mt-1">
+                        {{ Str::limit(strip_tags($r->bibliografia), 120) }}
+                    </p>
+                    <div class="mt-3">
+                        <a href="{{ route('catalogo.show', $r->id) }}" class="btn btn-sm btn-outline-primary">Ver livro</a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+</div>
+
+
         </div>
     </div>
 </div>

@@ -46,14 +46,15 @@ class RequisicaoController extends Controller
             'status' => 'ativo',
         ]);
 
-
+        // Email para o usuário
         Mail::to($user->email)->send(new NovaRequisicaoMail($requisicao));
+        usleep(500000); // 0.5s delay
 
-        //$admins = User::where('role', 'admin')->get();
+        // Emails para admins (um por vez com delay)
         $admins = User::where('role_id', 1)->get();
-
         foreach ($admins as $admin) {
             Mail::to($admin->email)->send(new NovaRequisicaoMail($requisicao));
+            usleep(500000); // 0.5s delay
         }
 
         return back()->with('success', "Requisição criada com sucesso! Nº {$requisicao->numero}");
@@ -63,47 +64,51 @@ class RequisicaoController extends Controller
      * Marcar entrega (Admin)
      */
     public function marcarEntregue(Requisicao $requisicao)
-{
-    // 1. Marcar a requisição como entregue
-    $requisicao->update([
-        'status' => 'entregue',
-        'data_entrega_real' => today(),
-    ]);
+    {
+        // 1. Marcar a requisição como entregue
+        $requisicao->update([
+            'status' => 'entregue',
+            'data_entrega_real' => today(),
+        ]);
 
-    $livro = $requisicao->livro;
+        $livro = $requisicao->livro;
 
-    // 2. Enviar email de confirmação ao cidadão e admins
-    $admins = User::where('role_id', 1)->get();
+        // 2. Enviar email de confirmação ao cidadão e admins
+        $admins = User::where('role_id', 1)->get();
 
-    Mail::to($requisicao->user?->email)->send(new ConfirmacaoEntregaMail($requisicao));
+        // Email para o cidadão
+        Mail::to($requisicao->user?->email)->send(new ConfirmacaoEntregaMail($requisicao));
+        usleep(500000); // 0.5s delay
 
-    foreach ($admins as $admin) {
-        Mail::to($admin->email)->send(new ConfirmacaoEntregaMail($requisicao));
-    }
-
-    /**
-     * 3. ALERTA LIVRO DISPONÍVEL
-     * Só acontece SE o livro ficou realmente disponível após esta entrega.
-     * Ou seja, se já não existir nenhuma requisição ativa.
-     */
-    if ($livro->isDisponivel()) {
-
-        // Buscar alertas pendentes
-        $alertas = \App\Models\AlertaLivro::where('livro_id', $livro->id)
-            ->whereNull('notificado_em')
-            ->get();
-
-        foreach ($alertas as $alerta) {
-            Mail::to($alerta->user->email)
-                ->send(new \App\Mail\LivroDisponivel($livro));
-
-            // Marcar como notificado
-            $alerta->update(['notificado_em' => now()]);
+        // Emails para admins (um por vez com delay)
+        foreach ($admins as $admin) {
+            Mail::to($admin->email)->send(new ConfirmacaoEntregaMail($requisicao));
+            usleep(500000); // 0.5s delay
         }
-    }
 
-    return back()->with('success', 'Livro marcado como entregue.');
-}
+        /**
+         * 3. ALERTA LIVRO DISPONÍVEL
+         * Só acontece SE o livro ficou realmente disponível após esta entrega.
+         * Ou seja, se já não existir nenhuma requisição ativa.
+         */
+        if ($livro->isDisponivel()) {
+            // Buscar alertas pendentes
+            $alertas = \App\Models\AlertaLivro::where('livro_id', $livro->id)
+                ->whereNull('notificado_em')
+                ->get();
+
+            foreach ($alertas as $alerta) {
+                Mail::to($alerta->user->email)
+                    ->send(new \App\Mail\LivroDisponivel($livro));
+                usleep(500000); // 0.5s delay
+
+                // Marcar como notificado
+                $alerta->update(['notificado_em' => now()]);
+            }
+        }
+
+        return back()->with('success', 'Livro marcado como entregue.');
+    }
 
 
     /**

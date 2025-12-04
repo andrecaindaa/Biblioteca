@@ -1,12 +1,29 @@
 <p>Olá {{ $user->name }},</p>
 
 @if($review->status === 'ativo')
-    <p>A sua avaliação para o livro <strong>{{ $livro->nome }}</strong> foi aprovada e já está visível no detalhe do livro. Obrigado pelo feedback!</p>
+
+    <p>
+        A sua avaliação para o livro
+        <strong>{{ $livro->nome }}</strong> foi <strong>aprovada</strong>
+        e já está visível no catálogo.
+        Obrigado pelo feedback!
+    </p>
+
 @else
-    <p>A sua avaliação para o livro <strong>{{ $livro->nome }}</strong> foi recusada pelo administrador.</p>
+
+    <p>
+        A sua avaliação para o livro
+        <strong>{{ $livro->nome }}</strong> foi <strong>recusada</strong>
+        pelo administrador.
+    </p>
+
     @if($review->justificacao_recusa)
-        <p><strong>Justificação:</strong> {{ $review->justificacao_recusa }}</p>
+        <p>
+            <strong>Justificação:</strong>
+            {{ $review->justificacao_recusa }}
+        </p>
     @endif
+
 @endif
 
-<p>Atenciosamente,<br />Sistema Biblioteca</p>
+<p>Atenciosamente,<br>Sistema Biblioteca</p>

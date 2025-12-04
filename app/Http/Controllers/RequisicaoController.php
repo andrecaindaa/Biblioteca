@@ -63,22 +63,48 @@ class RequisicaoController extends Controller
      * Marcar entrega (Admin)
      */
     public function marcarEntregue(Requisicao $requisicao)
-    {
-        $requisicao->update([
-            'status' => 'entregue',
-            'data_entrega_real' => today(),
-        ]);
+{
+    // 1. Marcar a requisição como entregue
+    $requisicao->update([
+        'status' => 'entregue',
+        'data_entrega_real' => today(),
+    ]);
 
-        $admins = User::where('role_id', 1)->get();
+    $livro = $requisicao->livro;
 
-        //$admins = User::where('role', 'admin')->get();
-        Mail::to($requisicao->user?->email)->send(new ConfirmacaoEntregaMail($requisicao));
-        foreach ($admins as $admin) {
-            Mail::to($admin->email)->send(new ConfirmacaoEntregaMail($requisicao));
-        }
+    // 2. Enviar email de confirmação ao cidadão e admins
+    $admins = User::where('role_id', 1)->get();
 
-        return back()->with('success', 'Livro marcado como entregue.');
+    Mail::to($requisicao->user?->email)->send(new ConfirmacaoEntregaMail($requisicao));
+
+    foreach ($admins as $admin) {
+        Mail::to($admin->email)->send(new ConfirmacaoEntregaMail($requisicao));
     }
+
+    /**
+     * 3. ALERTA LIVRO DISPONÍVEL
+     * Só acontece SE o livro ficou realmente disponível após esta entrega.
+     * Ou seja, se já não existir nenhuma requisição ativa.
+     */
+    if ($livro->isDisponivel()) {
+
+        // Buscar alertas pendentes
+        $alertas = \App\Models\AlertaLivro::where('livro_id', $livro->id)
+            ->whereNull('notificado_em')
+            ->get();
+
+        foreach ($alertas as $alerta) {
+            Mail::to($alerta->user->email)
+                ->send(new \App\Mail\LivroDisponivel($livro));
+
+            // Marcar como notificado
+            $alerta->update(['notificado_em' => now()]);
+        }
+    }
+
+    return back()->with('success', 'Livro marcado como entregue.');
+}
+
 
     /**
      * Listagem de requisições

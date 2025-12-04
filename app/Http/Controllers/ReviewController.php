@@ -58,10 +58,12 @@ class ReviewController extends Controller
         ]);
 
         // Notificar Admins por email
-        $admins = \App\Models\User::where('role', 'admin')->get();
-        foreach ($admins as $admin) {
-            Mail::to($admin->email)->queue(new NewReviewForAdmin($review));
-        }
+       $admins = \App\Models\User::where('role', 'admin')->pluck('email');
+
+        $admins->each(function($email) use ($review){
+            Mail::to($email)->queue(new NewReviewForAdmin($review));
+        });
+
 
         return redirect()->route('requisicoes.show', $requisicao->id)
             ->with('success', 'Review submetida com sucesso e aguarda moderação do Admin.');

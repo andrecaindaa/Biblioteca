@@ -1,3 +1,5 @@
+@php use Illuminate\Support\Str; @endphp
+
 <p>Olá Admin,</p>
 
 <p>Foi submetida uma nova review em estado <strong>suspenso</strong>:</p>
@@ -9,4 +11,9 @@
     <li><strong>Comentário:</strong> {{ Str::limit($review->comentario, 300) }}</li>
 </ul>
 
-<p>Ver a review: <a href="{{ $link }}">{{ $link }}</a></p>
+<p>
+    Ver a review:
+    <a href="{{ $link }}">{{ $link }}</a>
+</p>
+
+<p>Atenciosamente,<br>Biblioteca Municipal</p>

@@ -66,7 +66,22 @@
                             </div>
                         </div>
                     @else
-                        <div class="alert alert-warning">Este livro está atualmente indisponível.</div>
+                        <div class="alert alert-warning">
+                    Este livro está atualmente indisponível.
+                </div>
+
+                @auth
+                    @if(!$livro->isDisponivel())
+                        <button wire:click="ativarAlerta" class="btn btn-outline-primary mt-3">
+                            Avisar-me quando estiver disponível
+                        </button>
+
+                        @if (session()->has('alerta_success'))
+                            <div class="alert alert-success mt-2">{{ session('alerta_success') }}</div>
+                        @endif
+                    @endif
+                @endauth
+
                     @endif
                 @else
                     <a href="{{ route('login') }}" class="btn btn-primary">Iniciar Sessão para Requisitar</a>

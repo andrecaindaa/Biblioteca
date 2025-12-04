@@ -86,5 +86,57 @@
         </div>
     </div>
 
+
+    {{-- FORMULÁRIO PARA O CIDADÃO DEIXAR REVIEW --}}
+@if(
+    auth()->check() &&
+    !auth()->user()->isAdmin() &&
+    $requisicao->user_id === auth()->id() &&
+    $requisicao->data_entrega_real &&
+    !$requisicao->review
+)
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h4 class="card-title">📝 Deixar Review</h4>
+            <p class="text-muted">Agora que já entregaste o livro, podes deixar um review.</p>
+
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger">{{ session('error') }}</div>
+            @endif
+
+            <form action="{{ route('reviews.store', $requisicao->id) }}" method="POST">
+                @csrf
+
+                <div class="mb-3">
+                    <label class="form-label">Avaliação (1–5 estrelas)</label>
+                    <select name="rating" class="form-select" required>
+                        <option value="">Selecionar…</option>
+                        <option value="1">1 ⭐</option>
+                        <option value="2">2 ⭐⭐</option>
+                        <option value="3">3 ⭐⭐⭐</option>
+                        <option value="4">4 ⭐⭐⭐⭐</option>
+                        <option value="5">5 ⭐⭐⭐⭐⭐</option>
+                    </select>
+                    @error('rating') <div class="text-danger">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Comentário</label>
+                    <textarea name="comentario" rows="4" class="form-control" placeholder="Escreve o teu comentário..." required></textarea>
+                    @error('comentario') <div class="text-danger">{{ $message }}</div> @enderror
+                </div>
+
+                <button class="btn btn-primary">Enviar Review</button>
+            </form>
+        </div>
+    </div>
+@endif
+
+
 </div>
+
+
 @endsection

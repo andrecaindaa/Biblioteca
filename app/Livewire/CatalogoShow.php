@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Review;
+use App\Models\AlertaLivro;
 
 use App\Mail\RequisicaoCriada;
 use Illuminate\Support\Facades\Mail;
@@ -105,35 +106,62 @@ class CatalogoShow extends Component
     }
 
    public function render()
-{
+    {
 
-     // carregar histórico (últimas 10)
-        $historico = $this->livro->requisicoes()->with('user')->latest()->limit(10)->get();
+        // carregar histórico (últimas 10)
+            $historico = $this->livro->requisicoes()->with('user')->latest()->limit(10)->get();
 
-        // obter relacionados (top 5)
-        $related = $this->relatedService->getRelated($this->livro, 5);
+            // obter relacionados (top 5)
+            $related = $this->relatedService->getRelated($this->livro, 5);
 
-    // carregar histórico (últimas 10)
-    $historico = $this->livro->requisicoes()
-        ->with('user')
-        ->latest()
-        ->limit(10)
-        ->get();
+        // carregar histórico (últimas 10)
+        $historico = $this->livro->requisicoes()
+            ->with('user')
+            ->latest()
+            ->limit(10)
+            ->get();
 
-    // carregar reviews ativas
-            $reviews = Review::where('livro_id', $this->livro->id)
-                ->where('status', 'ativo')
-                ->with('user')
-                ->latest()
-                ->get();
+        // carregar reviews ativas
+                $reviews = Review::where('livro_id', $this->livro->id)
+                    ->where('status', 'ativo')
+                    ->with('user')
+                    ->latest()
+                    ->get();
 
-            return view('livewire.catalogo-show', [
-                'livro' => $this->livro,
-                'historico' => $historico,
-                'reviews' => \App\Models\Review::where('livro_id', $this->livro->id)
-                            ->where('status','ativo')->with('user')->latest()->get(),
-            'relatedBooks' => $related,
-    ]);
-}
+                return view('livewire.catalogo-show', [
+                    'livro' => $this->livro,
+                    'historico' => $historico,
+                    'reviews' => \App\Models\Review::where('livro_id', $this->livro->id)
+                                ->where('status','ativo')->with('user')->latest()->get(),
+                'relatedBooks' => $related,
+        ]);
+    }
 
+    public function ativarAlerta()
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->isAdmin()) {
+            session()->flash('alerta_success', 'Apenas cidadãos podem usar este alerta.');
+            return;
+        }
+
+        // Verifica se já existe alerta pendente
+        $existe = AlertaLivro::where('livro_id', $this->livro->id)
+            ->where('user_id', $user->id)
+            ->whereNull('notificado_em')
+            ->exists();
+
+        if ($existe) {
+            session()->flash('alerta_success', 'Já será avisado quando o livro estiver disponível 📬');
+            return;
+        }
+
+        AlertaLivro::create([
+            'livro_id' => $this->livro->id,
+            'user_id'   => $user->id,
+        ]);
+
+        session()->flash('alerta_success', 'Receberá um email quando o livro estiver disponível 📬');
+    }
 }

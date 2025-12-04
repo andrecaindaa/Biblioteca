@@ -10,7 +10,12 @@
             <p><strong>Rating:</strong> {{ $review->rating ?? '—' }}</p>
             <p><strong>Comentário:</strong></p>
             <p>{{ $review->comentario }}</p>
-            <p><strong>Status:</strong> {{ $review->status }}</p>
+            <p><strong>Status:</strong>
+                <span class="badge bg-{{ $review->status === 'ativo' ? 'success' : ($review->status === 'recusado' ? 'danger' : 'secondary') }}">
+                    {{ ucfirst($review->status) }}
+                </span>
+            </p>
+
             @if($review->justificacao_recusa)
                 <p><strong>Justificação recusa:</strong> {{ $review->justificacao_recusa }}</p>
             @endif

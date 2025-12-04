@@ -11,7 +11,7 @@
                     <strong>{{ $review->livro->nome }}</strong>
                     <div>Cidadão: {{ $review->user->name }} ({{ $review->user->email }})</div>
                     <div>Rating: {{ $review->rating ?? '—' }}</div>
-                    <div>Comentário: {{ Str::limit($review->comentario, 200) }}</div>
+                    <div>Comentário: {{ \Illuminate\Support\Str::limit($review->comentario, 200) }}</div>
                 </div>
                 <div class="text-end">
                     <a href="{{ route('admin.reviews.show', $review->id) }}" class="btn btn-sm btn-primary">Ver / Moderar</a>

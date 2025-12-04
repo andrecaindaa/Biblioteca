@@ -1,6 +1,5 @@
 <?php
 
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -24,12 +23,14 @@ use App\Livewire\CatalogoShow;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 
+
 /*
 |--------------------------------------------------------------------------
 | ROTA RAIZ
 |--------------------------------------------------------------------------
 */
 Route::get('/', fn() => redirect()->route('dashboard'));
+
 
 /*
 |--------------------------------------------------------------------------
@@ -45,10 +46,11 @@ Route::get('/email/verify/{id}/{hash}', function (\Illuminate\Foundation\Auth\Em
     return redirect('/dashboard');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
-Route::post('/email/verification-notification', function (\Illuminate\Http\Request $request) {
+Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Link de verificação enviado!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -80,17 +82,11 @@ Route::middleware('auth')->group(function () {
     | REQUISIÇÕES (Cidadão + Admin)
     |--------------------------------------------------------------------------
     */
-    /*Route::get('/livros/{livro}/requisitar', [RequisicaoController::class, 'create'])
+    Route::get('/livros/{livro}/requisitar', [UserController::class, 'requisitarForm'])
         ->name('users.requisitar.form');
 
-    Route::post('/livros/{livro}/requisitar', [RequisicaoController::class, 'store'])
-        ->name('users.requisitar.store');*/
-
-        Route::get('/livros/{livro}/requisitar', [UserController::class, 'requisitarForm'])
-    ->name('users.requisitar.form');
-
-Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
-    ->name('users.requisitar.store');
+    Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
+        ->name('users.requisitar.store');
 
     Route::get('/requisicoes/{requisicao}/confirmar', [RequisicaoController::class, 'confirmar'])
         ->name('requisicoes.confirmar');
@@ -102,164 +98,147 @@ Route::post('/livros/{livro}/requisitar', [UserController::class, 'requisitar'])
         ->name('requisicoes.entregar');
 
     Route::resource('requisicoes', RequisicaoController::class)
-    ->only(['index', 'show'])
-    ->parameters([
-        'requisicoes' => 'requisicao'
-    ]);
+        ->only(['index', 'show'])
+        ->parameters(['requisicoes' => 'requisicao']);
+
 
     /*
     |--------------------------------------------------------------------------
-    | ÁREA ADMINISTRATIVA (Livewire sem middleware)
+    | REVIEWS — CIDADÃO (apenas após entrega)
     |--------------------------------------------------------------------------
     */
+    Route::get('/requisicoes/{requisicao}/review/create', [ReviewController::class, 'create'])
+        ->name('reviews.create');
 
-// Dashboard Admin
-Route::get('/admin/dashboard', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return view('admin.dashboard');
-})->name('admin.dashboard');
-
-//BookStoreAPI
-// Google Books - Apenas Admin
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/googlebooks/search', function () {
-        if (!Auth::user()->isAdmin()) abort(403);
-
-        return app()->call([app(\App\Http\Controllers\GoogleBooksController::class), 'search']);
-    })->name('googlebooks.search');
-
-    Route::post('/googlebooks/import', function (\Illuminate\Http\Request $request) {
-        if (!Auth::user()->isAdmin()) abort(403);
-
-        return app()->call([app(\App\Http\Controllers\GoogleBooksController::class), 'import'], ['request' => $request]);
-    })->name('googlebooks.import');
+    Route::post('/requisicoes/{requisicao}/review', [ReviewController::class, 'store'])
+        ->name('reviews.store');
 
 
-    // Cidadão cria review (apenas após entrega)
-Route::get('/requisicoes/{requisicao}/review/create', [ReviewController::class, 'create'])
-    ->name('reviews.create');
-
-Route::post('/requisicoes/{requisicao}/review', [ReviewController::class, 'store'])
-    ->name('reviews.store');
-});
     /*
+    |--------------------------------------------------------------------------
+    | GOOGLE BOOKS (apenas Admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('auth')->group(function () {
+
+        Route::get('/googlebooks/search', function () {
+            if (!Auth::user()->isAdmin()) abort(403);
+            return app()->call([app(GoogleBooksController::class), 'search']);
+        })->name('googlebooks.search');
+
+        Route::post('/googlebooks/import', function (Request $request) {
+            if (!Auth::user()->isAdmin()) abort(403);
+            return app()->call([app(GoogleBooksController::class), 'import'], ['request' => $request]);
+        })->name('googlebooks.import');
+    });
+
+}); // ← FECHA O BLOCO auth CORRETAMENTE
+
+
+/*
 |--------------------------------------------------------------------------
-| REVIEWS — Admin (moderação)
+| REVIEWS — ADMIN (moderação)
 |--------------------------------------------------------------------------
 */
+Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-Route::prefix('admin')->group(function () {
+    Route::get('/reviews', [AdminReviewController::class, 'index'])
+        ->name('admin.reviews.index');
 
-    Route::get('/reviews', function () {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return app()->call([AdminReviewController::class, 'index']);
-    })->name('admin.reviews.index');
+    Route::get('/reviews/{review}', [AdminReviewController::class, 'show'])
+        ->name('admin.reviews.show');
 
-    Route::get('/reviews/{review}', function ($review) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return app()->call([AdminReviewController::class, 'show'], ['review' => $review]);
-    })->name('admin.reviews.show');
+    Route::post('/reviews/{review}/approve', [AdminReviewController::class, 'approve'])
+        ->name('admin.reviews.approve');
 
-    Route::post('/reviews/{review}/approve', function ($review) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return app()->call([AdminReviewController::class, 'approve'], ['review' => $review]);
-    })->name('admin.reviews.approve');
-
-    Route::post('/reviews/{review}/reject', function (Request $request, $review) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return app()->call([AdminReviewController::class, 'reject'], ['review' => $review, 'request' => $request]);
-    })->name('admin.reviews.reject');
-
+    Route::post('/reviews/{review}/reject', [AdminReviewController::class, 'reject'])
+        ->name('admin.reviews.reject');
 });
 
 
-
-// Gestão de usuários
+/*
+|--------------------------------------------------------------------------
+| ÁREA ADMINISTRATIVA — Users / Livros / Autores / Editoras
+|--------------------------------------------------------------------------
+*/
 Route::prefix('admin')->group(function () {
 
-    Route::get('/users', function () {
+    // Dashboard Admin
+    Route::get('/dashboard', function () {
         if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->index();
-    })->name('users.index');
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
 
-    Route::get('/users/create', function () {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->create();
-    })->name('users.create');
 
-    Route::post('/users', function (Request $request) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->store($request);
-    })->name('users.store');
+    /*
+    |--------------------------------------------------------------------------
+    | Gestão de usuários
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/users', fn() => Auth::user()->isAdmin() ? (new UserController)->index() : abort(403))
+        ->name('users.index');
 
-    Route::get('/users/{user}', function (User $user) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->show($user);
-    })->name('users.show');
+    Route::get('/users/create', fn() => Auth::user()->isAdmin() ? (new UserController)->create() : abort(403))
+        ->name('users.create');
 
-    Route::get('/users/{user}/edit', function (User $user) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->edit($user);
-    })->name('users.edit');
+    Route::post('/users', fn(Request $request) => Auth::user()->isAdmin() ? (new UserController)->store($request) : abort(403))
+        ->name('users.store');
 
-    Route::put('/users/{user}', function (Request $request, User $user) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->update($request, $user);
-    })->name('users.update');
+    Route::get('/users/{user}', fn(User $user) => Auth::user()->isAdmin() ? (new UserController)->show($user) : abort(403))
+        ->name('users.show');
 
-    Route::delete('/users/{user}', function (User $user) {
-        if (!Auth::user()->isAdmin()) abort(403);
-        return (new UserController)->destroy($user);
-    })->name('users.destroy');
-});
+    Route::get('/users/{user}/edit', fn(User $user) => Auth::user()->isAdmin() ? (new UserController)->edit($user) : abort(403))
+        ->name('users.edit');
 
-// Livros
-Route::get('/admin/livros', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(Livros::class);
-})->name('admin.livros.index');
+    Route::put('/users/{user}', fn(Request $request, User $user) => Auth::user()->isAdmin() ? (new UserController)->update($request, $user) : abort(403))
+        ->name('users.update');
 
-Route::get('/admin/livros/create', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(LivroForm::class);
-})->name('admin.livros.create');
+    Route::delete('/users/{user}', fn(User $user) => Auth::user()->isAdmin() ? (new UserController)->destroy($user) : abort(403))
+        ->name('users.destroy');
 
-Route::get('/admin/livros/{livro}/edit', function ($livro) {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(LivroForm::class, ['livro' => $livro]);
-})->name('admin.livros.edit');
 
-// Autores
-Route::get('/admin/autores', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(Autores::class);
-})->name('admin.autores.index');
+    /*
+    |--------------------------------------------------------------------------
+    | Livros
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/livros', fn() => Auth::user()->isAdmin() ? app()->call(Livros::class) : abort(403))
+        ->name('admin.livros.index');
 
-Route::get('/admin/autores/create', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(AutorForm::class);
-})->name('admin.autores.create');
+    Route::get('/livros/create', fn() => Auth::user()->isAdmin() ? app()->call(LivroForm::class) : abort(403))
+        ->name('admin.livros.create');
 
-Route::get('/admin/autores/{autor}/edit', function ($autor) {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(AutorForm::class, ['autor' => $autor]);
-})->name('admin.autores.edit');
+    Route::get('/livros/{livro}/edit', fn($livro) => Auth::user()->isAdmin() ? app()->call(LivroForm::class, ['livro' => $livro]) : abort(403))
+        ->name('admin.livros.edit');
 
-// Editoras
-Route::get('/admin/editoras', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(Editoras::class);
-})->name('admin.editoras.index');
 
-Route::get('/admin/editoras/create', function () {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(EditoraForm::class);
-})->name('admin.editoras.create');
+    /*
+    |--------------------------------------------------------------------------
+    | Autores
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/autores', fn() => Auth::user()->isAdmin() ? app()->call(Autores::class) : abort(403))
+        ->name('admin.autores.index');
 
-Route::get('/admin/editoras/{editora}/edit', function ($editora) {
-    if (!Auth::user()->isAdmin()) abort(403);
-    return app()->call(EditoraForm::class, ['editora' => $editora]);
-})->name('admin.editoras.edit');
+    Route::get('/autores/create', fn() => Auth::user()->isAdmin() ? app()->call(AutorForm::class) : abort(403))
+        ->name('admin.autores.create');
+
+    Route::get('/autores/{autor}/edit', fn($autor) => Auth::user()->isAdmin() ? app()->call(AutorForm::class, ['autor' => $autor]) : abort(403))
+        ->name('admin.autores.edit');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Editoras
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/editoras', fn() => Auth::user()->isAdmin() ? app()->call(Editoras::class) : abort(403))
+        ->name('admin.editoras.index');
+
+    Route::get('/editoras/create', fn() => Auth::user()->isAdmin() ? app()->call(EditoraForm::class) : abort(403))
+        ->name('admin.editoras.create');
+
+    Route::get('/editoras/{editora}/edit', fn($editora) => Auth::user()->isAdmin() ? app()->call(EditoraForm::class, ['editora' => $editora]) : abort(403))
+        ->name('admin.editoras.edit');
 
 });

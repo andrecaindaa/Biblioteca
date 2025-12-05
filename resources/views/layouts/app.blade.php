@@ -30,6 +30,10 @@
                     @if(Route::has('users.index'))
                         <li><a href="{{ route('users.index') }}">Utilizadores</a></li>
                     @endif
+
+                    @if(Route::has('admin.reviews.index'))
+                        <li><a href="{{ route('admin.reviews.index') }}">Reviews</a></li>
+                    @endif
                 @endif
 
                 <li><a href="{{ route('profile.show') }}">Perfil</a></li>

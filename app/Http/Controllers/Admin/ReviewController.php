@@ -34,7 +34,7 @@ class ReviewController extends Controller
         $review->save();
 
         // notificar autor
-        Mail::to($review->user->email)->queue(new ReviewStatusChanged($review));
+        Mail::to($review->user->email)->send(new ReviewStatusChanged($review));
 
         return redirect()->route('admin.reviews.index')->with('success', 'Review aprovada.');
     }
@@ -50,7 +50,7 @@ class ReviewController extends Controller
         $review->save();
 
         // notificar autor
-        Mail::to($review->user->email)->queue(new ReviewStatusChanged($review));
+        Mail::to($review->user->email)->send(new ReviewStatusChanged($review));
 
        return redirect()->route('admin.reviews.show', $review->id)
     ->with('success', 'Review recusada e autor notificado.');

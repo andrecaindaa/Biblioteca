@@ -132,7 +132,7 @@ Route::middleware('auth')->group(function () {
         })->name('googlebooks.import');
     });
 
-}); // ← FECHA O BLOCO auth CORRETAMENTE
+});
 
 
 /*

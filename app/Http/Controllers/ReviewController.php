@@ -58,7 +58,8 @@ class ReviewController extends Controller
         ]);
 
         // Notificar Admins por email
-       $admins = \App\Models\User::where('role', 'admin')->pluck('email');
+      $admins = \App\Models\User::where('role_id', 1)->pluck('email');
+
 
         $admins->each(function($email) use ($review){
             Mail::to($email)->queue(new NewReviewForAdmin($review));

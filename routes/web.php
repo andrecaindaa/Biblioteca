@@ -8,6 +8,7 @@ use App\Models\User;
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\GoogleBooksController;
 
@@ -75,7 +76,39 @@ Route::middleware('auth')->group(function () {
             $msg->to('admin@biblioteca.test')->subject('📚 Teste de Email - Biblioteca')
         );
         return 'Email enviado!';
+
+
+        //
+
+
+
     });
+
+
+    // Carrinho
+Route::get('/carrinho', [\App\Http\Controllers\CarrinhoController::class, 'index'])->name('carrinho.index');
+Route::post('/livros/{livro}/carrinho', [CarrinhoController::class, 'adicionar'])
+    ->name('carrinho.adicionar');
+Route::put('/carrinho/items/{item}', [\App\Http\Controllers\CarrinhoController::class, 'atualizar'])->name('carrinho.atualizar');
+Route::delete('/carrinho/items/{item}', [\App\Http\Controllers\CarrinhoController::class, 'remover'])->name('carrinho.remover');
+
+// Checkout
+Route::get('/checkout/address', [\App\Http\Controllers\CheckoutController::class, 'addressForm'])->name('checkout.address');
+Route::post('/checkout/address', [\App\Http\Controllers\CheckoutController::class, 'storeAddress'])->name('checkout.address.store');
+Route::get('/checkout/payment', [\App\Http\Controllers\CheckoutController::class, 'payment'])->name('checkout.payment');
+Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/cancel', [\App\Http\Controllers\CheckoutController::class, 'cancel'])->name('checkout.cancel');
+
+// Pedidos
+Route::get('/pedidos', [\App\Http\Controllers\PedidoController::class, 'index'])->name('pedidos.index');
+Route::get('/pedidos/{pedido}', [\App\Http\Controllers\PedidoController::class, 'show'])->name('pedidos.show');
+
+// Admin Pedidos
+Route::get('/admin/pedidos', [\App\Http\Controllers\Admin\PedidoController::class, 'index'])->name('admin.pedidos.index');
+Route::get('/admin/pedidos/{pedido}', [\App\Http\Controllers\Admin\PedidoController::class, 'show'])->name('admin.pedidos.show');
+
+// Stripe Webhook (public endpoint)
+Route::post('/stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
     /*
     |--------------------------------------------------------------------------

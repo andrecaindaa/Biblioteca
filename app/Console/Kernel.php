@@ -17,6 +17,8 @@ class Kernel extends ConsoleKernel
     {
         // Reminder diário de requisições que expiram amanhã
         $schedule->command('requisicoes:reminder')->dailyAt('08:00');
+        $schedule->command('carrinhos:check-abandoned')->everyFiveMinutes();
+
     }
 
     /**

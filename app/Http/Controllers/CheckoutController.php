@@ -24,7 +24,10 @@ class CheckoutController extends Controller
 
     public function storeAddress(Request $request)
     {
-        $this->validate($request, ['morada' => 'required|string|max:1500']);
+        $request->validate([
+    'morada' => 'required|string|max:1500',
+]);
+
 
         session(['checkout_morada' => $request->morada]);
 

@@ -51,17 +51,35 @@
                 @endif
             </div>
 
-            {{-- BOTÃO ADICIONAR AO CARRINHO (sempre para cidadãos autenticados) --}}
-            @if(auth()->check() && !auth()->user()->isAdmin())
-                <form action="{{ route('carrinho.adicionar', $livro->id) }}"
-                      method="POST"
-                      class="mt-4">
-                    @csrf
-                    <button type="submit" class="btn btn-accent w-full">
-                        🛒 Adicionar ao Carrinho
-                    </button>
-                </form>
-            @endif
+
+
+
+            {{-- BOTÃO ADICIONAR AO CARRINHO --}}
+@if(auth()->check() && !auth()->user()->isAdmin())
+
+    {{-- MENSAGENS DE FLASH DO CARRINHO --}}
+    @if(session('success'))
+        <div class="alert alert-success mt-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-error mt-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <form action="{{ route('carrinho.adicionar', $livro->id) }}"
+          method="POST"
+          class="mt-4">
+        @csrf
+        <button type="submit" class="btn btn-accent w-full">
+            🛒 Adicionar ao Carrinho
+        </button>
+    </form>
+@endif
+
 
             {{-- REQUISIÇÃO (apenas quando disponível e para cidadãos) --}}
             <div class="mt-6">

@@ -42,12 +42,18 @@ class CarrinhoController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Livro adicionado ao carrinho.');
+        return redirect()
+    ->route('carrinho.index')
+    ->with('success', 'Livro adicionado ao carrinho.');
+
     }
 
     public function atualizar(Request $request, CarrinhoItem $item)
     {
-        $this->validate($request, ['quantidade' => 'required|integer|min:1']);
+        $request->validate([
+    'quantidade' => ['required', 'integer', 'min:1'],
+]);
+
         $user = Auth::user();
         if ($user->isAdmin()) abort(403);
 

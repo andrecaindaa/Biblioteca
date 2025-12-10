@@ -36,6 +36,28 @@
                     @endif
                 @endif
 
+
+                @auth
+                    @if(!auth()->user()->isAdmin())
+                        @php
+                            $carrinho = \App\Models\Carrinho::firstOrCreate(['user_id' => auth()->id()]);
+                            $qtdItens = $carrinho->items->sum('quantidade');
+                        @endphp
+
+                        <li>
+                            <a href="{{ route('carrinho.index') }}" class="relative">
+                                🛒 Carrinho
+                                @if($qtdItens > 0)
+                                    <span class="badge badge-sm bg-secondary text-white absolute -top-2 -right-2">
+                                        {{ $qtdItens }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+                    @endif
+                @endauth
+
+
                 <li><a href="{{ route('profile.show') }}">Perfil</a></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">

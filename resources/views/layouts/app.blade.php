@@ -34,6 +34,14 @@
                     @if(Route::has('admin.reviews.index'))
                         <li><a href="{{ route('admin.reviews.index') }}">Reviews</a></li>
                     @endif
+
+
+    <li>
+        <a href="{{ route('admin.pedidos.index') }}" class="nav-link">
+            📦 Encomendas
+        </a>
+    </li>
+
                 @endif
 
 

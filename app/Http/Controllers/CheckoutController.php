@@ -88,7 +88,7 @@ class CheckoutController extends Controller
         'total' => $total,
     ]);
 
-    // 🔥 CRIAR ITEMS DO PEDIDO
+    //  CRIAR ITEMS DO PEDIDO
     foreach ($carrinho->items as $item) {
         PedidoItem::create([
             'pedido_id' => $pedido->id,
@@ -98,7 +98,7 @@ class CheckoutController extends Controller
         ]);
     }
 
-    // 🔥 LIMPAR CARRINHO DEPOIS DE CRIAR O PEDIDO
+    //  LIMPAR CARRINHO DEPOIS DE CRIAR O PEDIDO
     $carrinho->items()->delete();
 
     return view('checkout.payment', compact('session', 'pedido'));

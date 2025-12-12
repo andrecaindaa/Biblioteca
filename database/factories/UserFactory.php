@@ -35,7 +35,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'profile_photo_path' => null,
             'current_team_id' => null,
-            'role_id' => Role::factory(), // cria role automaticamente nos testes
+            'role_id' => Role::inRandomOrder()->first()->id ?? 1,// cria role automaticamente nos testes
         ];
     }
 

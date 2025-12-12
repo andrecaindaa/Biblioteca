@@ -274,4 +274,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/editoras/{editora}/edit', fn($editora) => Auth::user()->isAdmin() ? app()->call(EditoraForm::class, ['editora' => $editora]) : abort(403))
         ->name('admin.editoras.edit');
 
+        Route::view('/two-factor-challenge', 'auth.two-factor-challenge')
+    ->name('two-factor.login');
+
+
 });

@@ -15,7 +15,9 @@ class CheckAbandonedCarrinhos extends Command
     public function handle()
     {
         $carrinhos = Carrinho::whereHas('items')
-            ->where('updated_at', '<=', now()->subHour())
+            //->where('updated_at', '<=', now()->subHour())
+            ->where('updated_at', '<=', now()->subMinutes(1))
+
             ->get();
 
         foreach ($carrinhos as $carrinho) {

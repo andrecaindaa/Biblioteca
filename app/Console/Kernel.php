@@ -17,7 +17,9 @@ class Kernel extends ConsoleKernel
     {
         // Reminder diário de requisições que expiram amanhã
         $schedule->command('requisicoes:reminder')->dailyAt('08:00');
-        $schedule->command('carrinhos:check-abandoned')->everyFiveMinutes();
+        //$schedule->command('carrinhos:check-abandoned')->everyFiveMinutes();
+        $schedule->command('carrinhos:check-abandoned')->everyMinute();
+
 
     }
 
@@ -36,6 +38,7 @@ class Kernel extends ConsoleKernel
     }
     protected $commands = [
     \App\Console\Commands\TestGoogleBooks::class,
+     \App\Console\Commands\CheckAbandonedCarrinhos::class,
 ];
 
 

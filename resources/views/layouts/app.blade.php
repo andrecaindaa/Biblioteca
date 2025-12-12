@@ -61,6 +61,14 @@
                                     </span>
                                 @endif
                             </a>
+                            <a href="{{ route('pedidos.index') }}" class="relative">
+                                Minhas Encomendas
+                                @if($qtdItens > 0)
+                                    <span class="badge badge-sm bg-secondary text-white absolute -top-2 -right-2">
+                                        {{ $qtdItens }}
+                                    </span>
+                                @endif
+                            </a>
                         </li>
                     @endif
                 @endauth

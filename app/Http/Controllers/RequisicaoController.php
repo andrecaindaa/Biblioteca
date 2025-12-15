@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\NovaRequisicaoMail;
 use App\Mail\ConfirmacaoEntregaMail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\LogService;
 
 class RequisicaoController extends Controller
 {
@@ -18,6 +19,9 @@ class RequisicaoController extends Controller
     /**
      * Criar nova requisição
      */
+
+
+
     public function store(Request $request, Livro $livro)
     {
         $user = Auth::user();
@@ -46,6 +50,13 @@ class RequisicaoController extends Controller
             'status' => 'ativo',
         ]);
 
+                    // quando cria uma requisição
+            LogService::registar(
+                'Requisições',
+                'Criou uma requisição de livro',
+                $requisicao->id
+            );
+
         // Email para o usuário
         Mail::to($user->email)->send(new NovaRequisicaoMail($requisicao));
         usleep(500000); // 0.5s delay
@@ -70,6 +81,12 @@ class RequisicaoController extends Controller
             'status' => 'entregue',
             'data_entrega_real' => today(),
         ]);
+
+        LogService::registar(
+        'Requisições',
+        'Devolveu o livro',
+        $requisicao->id
+    );
 
         $livro = $requisicao->livro;
 

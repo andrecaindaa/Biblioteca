@@ -278,4 +278,13 @@ Route::prefix('admin')->group(function () {
     ->name('two-factor.login');
 
 
+    Route::get('/admin/logs', function () {
+    abort_unless(auth()->user()->isAdmin(), 403);
+
+    $logs = \App\Models\Log::with('user')->latest()->paginate(20);
+
+    return view('admin.logs.index', compact('logs'));
+})->name('admin.logs.index');
+
+
 });

@@ -18,6 +18,17 @@ class LivroFactory extends Factory
             'bibliografia' => $this->faker->paragraph(),
             'imagem_capa' => null,
             'preco' => $this->faker->randomFloat(2, 5, 100),
+            'stock' => $this->faker->numberBetween(1, 10),
         ];
+    }
+
+     /**
+     * Estado sem stock (para testes)
+     */
+    public function semStock(): static
+    {
+        return $this->state(fn () => [
+            'stock' => 0,
+        ]);
     }
 }

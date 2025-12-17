@@ -139,6 +139,12 @@ class UserController extends Controller
             'foto_cidadao' => 'nullable|image|max:2048',
         ]);
 
+
+        if ($livro->stock <= 0) {
+    return back()->with('error', 'Livro sem stock disponível.');
+}
+
+
         if (! $livro->isDisponivel()) {
             return back()->with('error', 'Este livro já não está disponível.');
         }

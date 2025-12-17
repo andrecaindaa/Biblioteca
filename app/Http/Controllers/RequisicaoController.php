@@ -29,6 +29,10 @@ class RequisicaoController extends Controller
             return back()->with('error', 'Administradores não podem fazer requisições.');
         }
 
+         if ($livro->stock <= 0) {
+        return back()->with('error', 'Livro sem stock disponível.');
+        }
+
         if (!$livro->isDisponivel()) {
             return back()->with('error', 'Este livro já está requisitado.');
         }

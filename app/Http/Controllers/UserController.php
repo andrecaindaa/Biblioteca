@@ -7,6 +7,8 @@ use App\Models\Livro;
 use App\Models\Requisicao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\LogService;
+
 
 class UserController extends Controller
 {
@@ -48,12 +50,19 @@ class UserController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        User::create([
+        //User::create([
+        $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => bcrypt($request->password),
             'role_id'  => 1, // ADMIN
         ]);
+
+        LogService::registar(
+    'Utilizadores',
+    'Criou um utilizador',
+    $user->id
+);
 
        return redirect()->route('users.index')
             ->with('success', 'Administrador criado com sucesso.');
@@ -90,6 +99,14 @@ class UserController extends Controller
             'role_id' => $request->role_id,
         ]);
 
+            //log
+        LogService::registar(
+    'Utilizadores',
+    'Atualizou um utilizador',
+    $user->id
+);
+
+
         return redirect()->route('users.index')
             ->with('success', 'Utilizador atualizado com sucesso.');
     }
@@ -99,7 +116,15 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        $user->delete();
+
+        $userId = $user->id;
+    $user->delete();
+
+    LogService::registar(
+        'Utilizadores',
+        'Eliminou um utilizador',
+        $userId
+    );
 
         return redirect()->route('users.index')
             ->with('success', 'Utilizador eliminado com sucesso.');
@@ -141,8 +166,14 @@ class UserController extends Controller
 
 
         if ($livro->stock <= 0) {
+
+             LogService::registar(
+        'Requisições',
+        'Tentou requisitar livro sem stock',
+        $livro->id
+    );
     return back()->with('error', 'Livro sem stock disponível.');
-}
+    }
 
 
         if (! $livro->isDisponivel()) {
@@ -155,7 +186,8 @@ class UserController extends Controller
             $fotoPath = $request->file('foto_cidadao')->store('requisicoes', 'public');
         }
 
-        Requisicao::create([
+        //Requisicao::create([
+        $requisicao = Requisicao::create([
             'user_id' => Auth::id(),
             'livro_id' => $livro->id,
             'numero' => Requisicao::gerarNumeroSequencial(),
@@ -164,6 +196,11 @@ class UserController extends Controller
             'foto_cidadao' => $fotoPath,
             'status' => 'ativo',
         ]);
+        LogService::registar(
+            'Requisições',
+            'Criou uma requisição',
+            $requisicao->id
+        );
 
         return redirect()->route('users.show', Auth::id())
             ->with('success', 'Requisição criada com sucesso.');
@@ -182,6 +219,12 @@ class UserController extends Controller
             'data_entrega_real' => now()->toDateString(),
             'status' => 'entregue',
         ]);
+
+        LogService::registar(
+    'Requisições',
+    'Entregou um livro',
+    $requisicao->id
+);
 
         return back()->with('success', 'Livro entregue com sucesso.');
     }

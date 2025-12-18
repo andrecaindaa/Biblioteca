@@ -75,6 +75,7 @@
 
 
                 <li><a href="{{ route('profile.show') }}">Perfil</a></li>
+                <li><a href="{{ route('admin.logs.index') }}">Logs</a></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
